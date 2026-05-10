@@ -1,0 +1,98 @@
+const { ROLES, ROLE_SCOPE, INTERNAL_ROLES, COMPANY_ROLES, PROVIDER_ROLES } = require('./roles');
+const { PERMISSIONS } = require('./permissions');
+
+const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE: 422,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_ERROR: 500,
+};
+
+const ERROR_CODES = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  AUTHENTICATION_ERROR: 'AUTHENTICATION_ERROR',
+  AUTHORIZATION_ERROR: 'AUTHORIZATION_ERROR',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  RATE_LIMITED: 'RATE_LIMITED',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  INVALID_TOKEN: 'INVALID_TOKEN',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  ACCOUNT_DISABLED: 'ACCOUNT_DISABLED',
+  TENANT_MISMATCH: 'TENANT_MISMATCH',
+  INVALID_STATUS_TRANSITION: 'INVALID_STATUS_TRANSITION',
+};
+
+const ORDER_STATUS = {
+  DRAFT: 'draft',
+  SUBMITTED: 'submitted',
+  PENDING_APPROVAL: 'pending_approval',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  PUBLISHED_FOR_OFFERS: 'published_for_offers',
+  OFFER_RECEIVED: 'offer_received',
+  OFFER_ACCEPTED: 'offer_accepted',
+  ASSIGNED: 'assigned',
+  EN_ROUTE_TO_PICKUP: 'en_route_to_pickup',
+  ARRIVED_PICKUP: 'arrived_pickup',
+  PICKED_UP: 'picked_up',
+  IN_TRANSIT: 'in_transit',
+  ARRIVED_DROPOFF: 'arrived_dropoff',
+  DELIVERED: 'delivered',
+  COMPLETED: 'completed',
+  CANCELED: 'canceled',
+};
+
+const OFFER_STATUS = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+  EXPIRED: 'expired',
+  WITHDRAWN: 'withdrawn',
+};
+
+const APPROVAL_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+};
+
+const INVOICE_STATUS = {
+  DRAFT: 'draft',
+  ISSUED: 'issued',
+  PARTIALLY_PAID: 'partially_paid',
+  PAID: 'paid',
+  CANCELED: 'canceled',
+  OVERDUE: 'overdue',
+};
+
+const TICKET_STATUS = {
+  OPEN: 'open',
+  IN_PROGRESS: 'in_progress',
+  RESOLVED: 'resolved',
+  CLOSED: 'closed',
+};
+
+module.exports = {
+  ROLES,
+  ROLE_SCOPE,
+  INTERNAL_ROLES,
+  COMPANY_ROLES,
+  PROVIDER_ROLES,
+  PERMISSIONS,
+  HTTP_STATUS,
+  ERROR_CODES,
+  ORDER_STATUS,
+  OFFER_STATUS,
+  APPROVAL_STATUS,
+  INVOICE_STATUS,
+  TICKET_STATUS,
+};
