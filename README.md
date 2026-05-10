@@ -1,95 +1,111 @@
-# Goods Transfer — Enterprise Logistics Platform
+# Goods Transfer — Backend
 
-A production-grade, multi-tenant logistics and transport management platform supporting individual customers, companies, service providers, and delivery drivers.
+Express.js REST API with Prisma ORM, JWT authentication, RBAC, and multi-tenant scoping.
 
 ## Architecture
 
 ```
-goods-transfer/
-├── backend/     # Node.js + Express + Prisma + MySQL
-└── frontend/    # React + Vite unified dashboard
+backend/
+├── prisma/              # Schema, migrations, seed
+├── src/
+│   ├── config/          # App configuration, env validation
+│   ├── constants/       # Enums, status codes, messages
+│   ├── lib/             # Prisma client, logger, mailer
+│   ├── middlewares/      # Auth, RBAC, validation, error handling
+│   ├── modules/         # Feature modules (auth, users, etc.)
+│   │   └── auth/
+│   │       ├── auth.controller.js
+│   │       ├── auth.service.js
+│   │       ├── auth.repository.js
+│   │       ├── auth.routes.js
+│   │       ├── auth.validation.js
+│   │       └── auth.swagger.js
+│   ├── routes/          # Route aggregation
+│   ├── services/        # Shared services (email, file upload)
+│   ├── socket/          # Socket.IO setup and handlers
+│   ├── types/           # JSDoc type definitions
+│   ├── utils/           # Helpers, response wrapper, pagination
+│   └── app.js           # Express app setup
+├── docs/                # Architecture documentation
+├── tests/               # Test files
+├── .env.example
+└── package.json
 ```
 
-## Tech Stack
+## Module Pattern
 
-| Layer | Technology |
-|---|---|
-| Backend Runtime | Node.js + Express.js |
-| Database | MySQL |
-| ORM | Prisma |
-| Auth | JWT (access + refresh tokens) |
-| API Docs | Swagger / OpenAPI 3.0 |
-| Real-time | Socket.IO |
-| Frontend | React + Vite |
-| Styling | CSS Modules / Theme system |
-| State | Zustand |
-| i18n | Ready for Arabic (RTL) |
+Each module follows a consistent layered structure:
 
-## Platform Apps
+1. **Controller** — HTTP request handling, input extraction, response formatting
+2. **Service** — Business logic, validation, orchestration
+3. **Repository** — Database access via Prisma, tenant-scoped queries
+4. **Routes** — Express router with middleware chain
+5. **Validation** — Joi schemas for request validation
+6. **Swagger** — OpenAPI documentation for the module
 
-| App | Type | Users |
-|---|---|---|
-| Individuals App | Mobile | Customers, Service Providers |
-| Companies App | Mobile | Employees, Managers, Drivers |
-| Admin Dashboard | Web | Internal admins |
-| Company Dashboard | Web | Company admins, managers |
-| Provider Dashboard | Web | Provider admins, operators |
-
-## Services Supported
-
-- Furniture Moving
-- Item Transport
-- Tow Truck
-- General Cargo / Custom Transport
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js >= 18
-- MySQL >= 8.0
-- npm >= 9
-
-### Backend Setup
+## Commands
 
 ```bash
-cd backend
-npm install
-cp .env.example .env    # Configure database URL
-npx prisma migrate dev  # Run migrations
-npm run seed            # Seed roles, permissions, users
-npm run dev             # Start dev server on :3000
+npm run dev          # Start development server with nodemon
+npm run start        # Start production server
+npm run seed         # Run database seed
+npm run lint         # Run ESLint
 ```
 
-### Frontend Setup
+## Prisma Commands
 
 ```bash
-cd frontend
-npm install
-cp .env.example .env
-npm run dev             # Start dev server on :5173
+npx prisma migrate dev       # Create and apply migration
+npx prisma migrate deploy    # Apply pending migrations (production)
+npx prisma generate          # Regenerate Prisma client
+npx prisma studio            # Open Prisma Studio GUI
+npx prisma db seed           # Run seed script
 ```
 
-### API Documentation
+## Demo logins
 
-After starting the backend:
+Run `npm run seed` first. **EN** — sample accounts. **AR** — نفس الحسابات للتجربة.
+
+### Internal admins — `Admin@123`
+
+| Account | Email |
+|--------|--------|
+| Super Admin | `admin@goodstransfer.com` |
+| Operations | `ops@goodstransfer.com` |
+| Support | `support@goodstransfer.com` |
+| Finance | `finance@goodstransfer.com` |
+
+### Company, provider & other test users — `Test@123`
+
+| Role | Email |
+|------|--------|
+| Company admin | `company@test.com` |
+| Employee | `employee@test.com` |
+| Line manager | `manager@test.com` |
+| Provider admin | `provider@test.com` |
+| Provider operator | `operator@test.com` |
+| Individual customer | `customer@test.com` |
+| Delivery driver | `driver@test.com` |
+
+### Troubleshooting
+
+If **`@test.com`** logins return **Invalid credentials** but internal admins work, those users may have been created earlier with another password. Run **`npm run seed`** again — the seed **updates** demo passwords on every run.
+
+## Environment Variables
+
+See `.env.example` for all required variables.
+
+## API Documentation
+
+Swagger UI available at `http://localhost:3000/api-docs` when the server is running.
+
+OpenAPI JSON (for mobile/SDK tooling) is available at `http://localhost:3000/api-docs.json`.
+
+## Migrations
+
+```bash
+npx prisma migrate deploy   # production / CI
+npx prisma migrate dev      # local: create new migration from schema changes
 ```
-http://localhost:3000/api-docs
-```
 
-## Project Documentation
-
-All architecture documentation lives in `backend/docs/`:
-
-- [Implementation Plan](backend/docs/IMPLEMENTATION_PLAN.md)
-- [API Contract](backend/docs/API_CONTRACT.md)
-- [RBAC Matrix](backend/docs/RBAC_MATRIX.md)
-- [Order Status Matrix](backend/docs/ORDER_STATUS_MATRIX.md)
-- [Screen Flow Matrix](backend/docs/SCREEN_FLOW_MATRIX.md)
-- [DB Schema Notes](backend/docs/DB_SCHEMA_NOTES.md)
-- [Postman Equivalent Notes](backend/docs/POSTMAN_EQUIVALENT_NOTES.md)
-- [Tenancy & Auth](backend/docs/TENANCY_AND_AUTH.md)
-
-## License
-
-Proprietary — All rights reserved.
+Initial schema is captured under `prisma/migrations/`. See `docs/TENANCY_AND_AUTH.md` for auth and tenant rules.
