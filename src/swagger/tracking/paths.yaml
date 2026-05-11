@@ -1,0 +1,218 @@
+/tracking/{orderId}:
+  get:
+    tags:
+      - Tracking
+    summary: Latest tracking events for order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+      - in: query
+        name: assignmentId
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/tracking/{orderId}/history:
+  get:
+    tags:
+      - Tracking
+    summary: Tracking event history
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+      - in: query
+        name: assignmentId
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/tracking/{orderId}/events:
+  post:
+    tags:
+      - Tracking
+    summary: Append tracking event
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - eventType
+            properties:
+              eventType:
+                type: string
+              latitude:
+                type: number
+                nullable: true
+              longitude:
+                type: number
+                nullable: true
+              data:
+                type: object
+                nullable: true
+                additionalProperties: true
+              assignmentId:
+                type: string
+                format: uuid
+                nullable: true
+/tracking/{orderId}/location:
+  post:
+    tags:
+      - Tracking
+    summary: Post GPS location
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - latitude
+              - longitude
+            properties:
+              latitude:
+                type: number
+              longitude:
+                type: number
+              assignmentId:
+                type: string
+                format: uuid
+                nullable: true
+/dashboard/tracking/{orderId}:
+  get:
+    tags:
+      - Admin Tracking
+    summary: Latest tracking events for order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+      - in: query
+        name: assignmentId
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/tracking/{orderId}/history:
+  get:
+    tags:
+      - Admin Tracking
+    summary: Tracking event history
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+      - in: query
+        name: assignmentId
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/tracking/{orderId}/events:
+  post:
+    tags:
+      - Admin Tracking
+    summary: Append tracking event
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - eventType
+            properties:
+              eventType:
+                type: string
+              latitude:
+                type: number
+                nullable: true
+              longitude:
+                type: number
+                nullable: true
+              data:
+                type: object
+                nullable: true
+                additionalProperties: true
+              assignmentId:
+                type: string
+                format: uuid
+                nullable: true
+/dashboard/tracking/{orderId}/location:
+  post:
+    tags:
+      - Admin Tracking
+    summary: Post GPS location
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - latitude
+              - longitude
+            properties:
+              latitude:
+                type: number
+              longitude:
+                type: number
+              assignmentId:
+                type: string
+                format: uuid
+                nullable: true

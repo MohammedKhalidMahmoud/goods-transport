@@ -1,0 +1,62 @@
+/settlements:
+  get:
+    tags:
+      - Settlements
+    summary: List settlements
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Settlements
+    summary: Create settlement
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/settlements/{id}:
+  get:
+    tags:
+      - Settlements
+    summary: Get settlement by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/settlements:
+  get:
+    tags:
+      - Admin Settlements
+    summary: List settlements
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Settlements
+    summary: Create settlement
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/settlements/{id}:
+  get:
+    tags:
+      - Admin Settlements
+    summary: Get settlement by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK

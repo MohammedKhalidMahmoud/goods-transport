@@ -13,14 +13,10 @@ const delegates = {
   rolePermission: prisma.rolePermission,
   dashboardUserProfile: prisma.dashboardUserProfile,
   userRole: prisma.userRole,
-  individualCustomer: prisma.individualCustomer,
-  customerAddress: prisma.customerAddress,
-  customerReview: prisma.customerReview,
   ticket: prisma.ticket,
   ticketComment: prisma.ticketComment,
   issueType: prisma.issueType,
   notification: prisma.notification,
-  fileAsset: prisma.fileAsset,
   order: prisma.order,
   companyUser: prisma.companyUser,
   provider: prisma.provider,
@@ -28,7 +24,6 @@ const delegates = {
   offer: prisma.offer,
   assignment: prisma.assignment,
   providerWallet: prisma.providerWallet,
-  auditLog: prisma.auditLog,
 };
 
 const delegate = (model) => delegates[model];

@@ -10,8 +10,7 @@ const router = Router();
 const tenant = [authenticate, resolveTenantScope];
 
 const companySchema = { body: Joi.object({ name: Joi.string().required(), nameAr: Joi.string().allow('', null), contactEmail: Joi.string().email().required(), contactPhone: Joi.string().required(), address: Joi.string().allow('', null), taxNumber: Joi.string().allow('', null), industry: Joi.string().allow('', null) }) };
-const branchSchema = { body: Joi.object({ companyId: Joi.string().uuid().required(), name: Joi.string().required(), nameAr: Joi.string().allow('', null), address: Joi.string().allow('', null), phone: Joi.string().allow('', null), city: Joi.string().allow('', null) }) };
-const companyUserSchema = { body: Joi.object({ companyId: Joi.string().uuid().required(), userId: Joi.string().uuid().required(), branchId: Joi.string().uuid().allow(null), role: Joi.string().required() }) };
+const companyUserSchema = { body: Joi.object({ companyId: Joi.string().uuid().required(), userId: Joi.string().uuid().required(), role: Joi.string().required() }) };
 const billingProfileSchema = { body: Joi.object({ companyId: Joi.string().uuid().required(), billingName: Joi.string().required(), billingEmail: Joi.string().email().required(), billingAddress: Joi.string().allow('', null), taxNumber: Joi.string().allow('', null), paymentTermsDays: Joi.number().integer(), creditLimit: Joi.number(), currency: Joi.string(), isDefault: Joi.boolean() }) };
 const approvalRuleSchema = { body: Joi.object({ companyId: Joi.string().uuid().required(), name: Joi.string().required(), serviceTypeCode: Joi.string().allow('', null), minAmount: Joi.number().allow(null), maxAmount: Joi.number().allow(null), approverRole: Joi.string().required(), level: Joi.number().integer() }) };
 const approveSchema = { body: Joi.object({ notes: Joi.string().allow('', null) }) };
@@ -22,12 +21,6 @@ router.post('/companies', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_
 router.get('/companies/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ, PERMISSIONS.COMPANIES_READ_OWN), companiesController.getCompany);
 router.patch('/companies/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_UPDATE, PERMISSIONS.COMPANIES_UPDATE_OWN), companiesController.updateCompany);
 router.delete('/companies/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_DELETE), companiesController.deleteCompany);
-
-router.get('/company-branches', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ_OWN, PERMISSIONS.COMPANIES_READ), companiesController.listBranches);
-router.post('/company-branches', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_BRANCHES), validate(branchSchema), companiesController.createBranch);
-router.get('/company-branches/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ_OWN), companiesController.getBranch);
-router.patch('/company-branches/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_BRANCHES), companiesController.updateBranch);
-router.delete('/company-branches/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_BRANCHES), companiesController.deleteBranch);
 
 router.get('/company-users', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_USERS, PERMISSIONS.USERS_READ), companiesController.listCompanyUsers);
 router.post('/company-users', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_USERS), validate(companyUserSchema), companiesController.createCompanyUser);

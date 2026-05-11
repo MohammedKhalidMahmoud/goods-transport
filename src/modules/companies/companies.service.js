@@ -42,46 +42,6 @@ class CompaniesService {
     await this.repo.update('company', id, { deletedAt: new Date() });
   }
 
-  async listBranches(query, tenantScope) {
-    const lq = parseListQuery(query, { searchFields: ['name'] });
-    const where = { ...lq.where };
-    if (tenantScope.type === 'company') where.companyId = tenantScope.companyId;
-    else if (query.companyId) where.companyId = query.companyId;
-    const [total, rows] = await Promise.all([
-      this.repo.count('companyBranch', where),
-      this.repo.findMany('companyBranch', {
-        where,
-        include: { company: { select: { id: true, name: true, nameAr: true } } },
-        orderBy: lq.orderBy,
-        skip: lq.skip,
-        take: lq.take,
-      }),
-    ]);
-    return { rows, total, page: lq.page, limit: lq.limit };
-  }
-
-  async createBranch(body, tenantScope) {
-    this.assertCompanyScope(body.companyId, tenantScope);
-    return this.repo.create('companyBranch', body);
-  }
-
-  async getBranch(id, tenantScope) {
-    const branch = await this.repo.findUnique('companyBranch', { where: { id } });
-    if (!branch) throw AppError.notFound();
-    this.assertCompanyScope(branch.companyId, tenantScope);
-    return branch;
-  }
-
-  async updateBranch(id, body, tenantScope) {
-    const branch = await this.getBranch(id, tenantScope);
-    return this.repo.update('companyBranch', branch.id, body);
-  }
-
-  async deleteBranch(id, tenantScope) {
-    const branch = await this.getBranch(id, tenantScope);
-    await this.repo.delete('companyBranch', branch.id);
-  }
-
   async listCompanyUsers(query, tenantScope) {
     const lq = parseListQuery(query, {});
     const where = { ...lq.where };

@@ -1,0 +1,166 @@
+/app-settings:
+  get:
+    tags:
+      - App Settings
+    summary: List app settings
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: OK
+  post:
+    tags:
+      - App Settings
+    summary: Create app setting
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - key
+              - value
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              group:
+                type: string
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+/app-settings/{id}:
+  get:
+    tags:
+      - App Settings
+    summary: Get app setting
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  patch:
+    tags:
+      - App Settings
+    summary: Update app setting
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              group:
+                type: string
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  delete:
+    tags:
+      - App Settings
+    summary: Delete app setting
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+/dashboard/app-settings:
+  get:
+    tags:
+      - Admin App Settings
+    summary: List app settings
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: OK
+  post:
+    tags:
+      - Admin App Settings
+    summary: Create app setting
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - key
+              - value
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              group:
+                type: string
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+/dashboard/app-settings/{id}:
+  get:
+    tags:
+      - Admin App Settings
+    summary: Get app setting
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  patch:
+    tags:
+      - Admin App Settings
+    summary: Update app setting
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              group:
+                type: string
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  delete:
+    tags:
+      - Admin App Settings
+    summary: Delete app setting
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'

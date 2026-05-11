@@ -1,0 +1,218 @@
+/vehicle-types:
+  get:
+    tags:
+      - Vehicle Types
+    summary: List vehicle types
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: OK
+  post:
+    tags:
+      - Vehicle Types
+    summary: Create vehicle type
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - name
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              capacity:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+/vehicle-types/{id}:
+  get:
+    tags:
+      - Vehicle Types
+    summary: Get vehicle type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  patch:
+    tags:
+      - Vehicle Types
+    summary: Update vehicle type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              capacity:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+  delete:
+    tags:
+      - Vehicle Types
+    summary: Delete vehicle type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+/dashboard/vehicle-types:
+  get:
+    tags:
+      - Admin Vehicle Types
+    summary: List vehicle types
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: OK
+  post:
+    tags:
+      - Admin Vehicle Types
+    summary: Create vehicle type
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - name
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              capacity:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+/dashboard/vehicle-types/{id}:
+  get:
+    tags:
+      - Admin Vehicle Types
+    summary: Get vehicle type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  patch:
+    tags:
+      - Admin Vehicle Types
+    summary: Update vehicle type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              capacity:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+  delete:
+    tags:
+      - Admin Vehicle Types
+    summary: Delete vehicle type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'

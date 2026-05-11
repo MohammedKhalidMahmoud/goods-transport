@@ -8,12 +8,6 @@ class CompaniesController {
   updateCompany = this.successHandler((req) => companiesService.updateCompany(req.params.id, req.body, req.tenantScope));
   deleteCompany = this.emptyHandler((req) => companiesService.deleteCompany(req.params.id, req.tenantScope), 'Deleted');
 
-  listBranches = this.paginatedHandler((req) => companiesService.listBranches(req.query, req.tenantScope));
-  createBranch = this.createdHandler((req) => companiesService.createBranch(req.body, req.tenantScope));
-  getBranch = this.successHandler((req) => companiesService.getBranch(req.params.id, req.tenantScope));
-  updateBranch = this.successHandler((req) => companiesService.updateBranch(req.params.id, req.body, req.tenantScope));
-  deleteBranch = this.emptyHandler((req) => companiesService.deleteBranch(req.params.id, req.tenantScope), 'Deleted');
-
   listCompanyUsers = this.paginatedHandler((req) => companiesService.listCompanyUsers(req.query, req.tenantScope));
   createCompanyUser = this.createdHandler((req) => companiesService.createCompanyUser(req.body, req.tenantScope));
   getCompanyUser = this.successHandler((req) => companiesService.getCompanyUser(req.params.id, req.tenantScope));

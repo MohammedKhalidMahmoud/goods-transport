@@ -24,11 +24,6 @@ const config = {
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   },
 
-  upload: {
-    dir: process.env.UPLOAD_DIR || 'uploads',
-    maxFileSize: parseInt(process.env.MAX_FILE_SIZE, 10) || 10 * 1024 * 1024,
-  },
-
   logging: {
     level: process.env.LOG_LEVEL || 'debug',
   },

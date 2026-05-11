@@ -1,0 +1,44 @@
+/earnings/reports:
+  get:
+    tags:
+      - Earnings
+    summary: Earnings reports
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/earnings/reports/{id}:
+  get:
+    tags:
+      - Earnings
+    summary: Get earnings report by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/earnings/reports:
+  get:
+    tags:
+      - Admin Earnings
+    summary: Earnings reports
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/earnings/reports/{id}:
+  get:
+    tags:
+      - Admin Earnings
+    summary: Get earnings report by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK

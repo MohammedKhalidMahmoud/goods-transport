@@ -1,0 +1,44 @@
+/commissions:
+  get:
+    tags:
+      - Commissions
+    summary: List commissions
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/commissions/{id}:
+  get:
+    tags:
+      - Commissions
+    summary: Get commission by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/commissions:
+  get:
+    tags:
+      - Admin Commissions
+    summary: List commissions
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/commissions/{id}:
+  get:
+    tags:
+      - Admin Commissions
+    summary: Get commission by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK

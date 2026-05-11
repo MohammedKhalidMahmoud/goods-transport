@@ -1,0 +1,154 @@
+/invoices:
+  get:
+    tags:
+      - Invoices
+    summary: List invoices
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Invoices
+    summary: Create invoice
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/invoices/{id}:
+  get:
+    tags:
+      - Invoices
+    summary: Get invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Invoices
+    summary: Update invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Invoices
+    summary: Delete invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/invoices/{id}/issue:
+  post:
+    tags:
+      - Invoices
+    summary: Issue invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/invoices/{id}/mark-paid:
+  post:
+    tags:
+      - Invoices
+    summary: Mark invoice paid
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/invoices:
+  get:
+    tags:
+      - Admin Invoices
+    summary: List invoices
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Invoices
+    summary: Create invoice
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/invoices/{id}:
+  get:
+    tags:
+      - Admin Invoices
+    summary: Get invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Invoices
+    summary: Update invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Invoices
+    summary: Delete invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/invoices/{id}/issue:
+  post:
+    tags:
+      - Admin Invoices
+    summary: Issue invoice
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/invoices/{id}/mark-paid:
+  post:
+    tags:
+      - Admin Invoices
+    summary: Mark invoice paid
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK

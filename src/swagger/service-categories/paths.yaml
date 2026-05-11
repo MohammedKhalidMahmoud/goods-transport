@@ -1,0 +1,266 @@
+/service-categories:
+  get:
+    tags:
+      - Service Categories
+    summary: List service categories
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+      - $ref: '#/components/parameters/SortByQuery'
+      - $ref: '#/components/parameters/SortOrderQuery'
+      - $ref: '#/components/parameters/SearchQuery'
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: Paginated list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginatedResponse'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+  post:
+    tags:
+      - Service Categories
+    summary: Create service category
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - name
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              icon:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+/service-categories/{id}:
+  get:
+    tags:
+      - Service Categories
+    summary: Get service category
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Service Categories
+    summary: Update service category
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              icon:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  delete:
+    tags:
+      - Service Categories
+    summary: Delete service category
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+/dashboard/service-categories:
+  get:
+    tags:
+      - Admin Service Categories
+    summary: List service categories
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+      - $ref: '#/components/parameters/SortByQuery'
+      - $ref: '#/components/parameters/SortOrderQuery'
+      - $ref: '#/components/parameters/SearchQuery'
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: Paginated list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginatedResponse'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+  post:
+    tags:
+      - Admin Service Categories
+    summary: Create service category
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - name
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              icon:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+/dashboard/service-categories/{id}:
+  get:
+    tags:
+      - Admin Service Categories
+    summary: Get service category
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Admin Service Categories
+    summary: Update service category
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              icon:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  delete:
+    tags:
+      - Admin Service Categories
+    summary: Delete service category
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'

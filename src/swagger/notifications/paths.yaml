@@ -1,0 +1,72 @@
+/notifications:
+  get:
+    tags:
+      - Notifications
+    summary: List my notifications
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Notifications
+    summary: Create notification (internal)
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/notifications/{id}:
+  get:
+    tags:
+      - Notifications
+    summary: Get notification by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/notifications/{id}/read:
+  post:
+    tags:
+      - Notifications
+    summary: Mark read
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/notifications/read-all:
+  post:
+    tags:
+      - Notifications
+    summary: Mark all read
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/notifications:
+  get:
+    tags:
+      - Admin Notifications
+    summary: List my notifications
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Notifications
+    summary: Create notification (internal)
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created

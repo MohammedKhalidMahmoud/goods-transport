@@ -3,7 +3,6 @@ const { parseListQuery } = require('../../lib/listQuery');
 const { ProvidersRepository } = require('./providers.repository');
 
 const includeByModel = {
-  providerServiceArea: { provider: true, area: true },
   providerDocument: { provider: true },
   providerDriver: { provider: true },
   providerWorker: { provider: true },

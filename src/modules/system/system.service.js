@@ -1,9 +1,6 @@
-const path = require('path');
-const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const { parseListQuery } = require('../../lib/listQuery');
 const { AppError } = require('../../utils/AppError');
-const { config } = require('../../config');
 const { PERMISSIONS } = require('../../constants/permissions');
 const { getIo, emitToRoom, EVENTS } = require('../../lib/socketEmitter');
 const ticketAccess = require('../support/ticket.access');
@@ -149,57 +146,6 @@ const updatePermission = (id, body) => repo.update('permission', { where: { id }
 const deletePermission = (id) => repo.delete('permission', { where: { id } });
 const setRolePermissions = (id, permissionIds) => repo.setRolePermissions(id, permissionIds);
 
-const getMyProfile = (user) => repo.findUnique('user', { where: { id: user.id }, select: { id: true, firstName: true, lastName: true, avatarUrl: true, language: true } });
-const updateMyProfile = (user, body) => repo.update('user', { where: { id: user.id }, data: body });
-
-async function getMyCustomer(user) {
-  return notFound(await repo.findUnique('individualCustomer', { where: { userId: user.id }, include: { user: true } }));
-}
-
-const updateMyCustomer = (user, body) => repo.update('individualCustomer', { where: { userId: user.id }, data: body });
-
-async function getCustomerProfile(user) {
-  return notFound(await repo.findUnique('individualCustomer', { where: { userId: user.id } }));
-}
-
-async function listCustomerAddresses(user) {
-  const customer = await getCustomerProfile(user);
-  return repo.findMany('customerAddress', { where: { individualCustomerId: customer.id } });
-}
-
-async function createCustomerAddress(user, body) {
-  const customer = await getCustomerProfile(user);
-  return repo.create('customerAddress', { data: { ...body, individualCustomerId: customer.id } });
-}
-
-async function getCustomerAddress(user, id) {
-  const customer = await getCustomerProfile(user);
-  return notFound(await repo.findFirst('customerAddress', { where: { id, individualCustomerId: customer.id } }));
-}
-
-async function updateCustomerAddress(user, id, body) {
-  await getCustomerAddress(user, id);
-  return repo.update('customerAddress', { where: { id }, data: body });
-}
-
-async function deleteCustomerAddress(user, id) {
-  const customer = await getCustomerProfile(user);
-  await repo.deleteMany('customerAddress', { where: { id, individualCustomerId: customer.id } });
-}
-
-async function listReviews(user) {
-  const customer = await repo.findUnique('individualCustomer', { where: { userId: user.id } });
-  if (!customer) return [];
-  return repo.findMany('customerReview', { where: { individualCustomerId: customer.id }, include: { provider: true, order: true } });
-}
-
-async function createReview(user, body) {
-  const customer = await getCustomerProfile(user);
-  const order = await repo.findFirst('order', { where: { id: body.orderId, status: 'completed', requesterId: user.id } });
-  if (!order) throw AppError.unprocessable('Order not completed');
-  return repo.create('customerReview', { data: { ...body, individualCustomerId: customer.id } });
-}
-
 async function listTickets(req) {
   const lq = parseListQuery(req.query, { searchFields: ['subject'] });
   const baseWhere = { ...lq.where };
@@ -289,69 +235,6 @@ const createNotification = (body) => repo.create('notification', { data: body })
 const markNotificationRead = (user, id) => repo.updateMany('notification', { where: { id, userId: user.id }, data: { isRead: true, readAt: new Date() } });
 const markAllNotificationsRead = (user) => repo.updateMany('notification', { where: { userId: user.id, isRead: false }, data: { isRead: true, readAt: new Date() } });
 
-async function createUpload(req) {
-  if (!req.file) throw AppError.badRequest('file required');
-  const allowed = ['order_attachment', 'provider_document', 'delivery_proof', 'invoice_document', 'support_attachment', 'profile_image', 'company_logo'];
-  const category = allowed.includes(req.body.category) ? req.body.category : 'order_attachment';
-  return repo.create('fileAsset', {
-    data: {
-      category,
-      originalName: req.file.originalname,
-      mimeType: req.file.mimetype,
-      fileSize: req.file.size,
-      filePath: `/uploads/${req.file.filename}`,
-      entityType: req.body.entityType || null,
-      entityId: req.body.entityId || null,
-      uploadedBy: req.user.id,
-    },
-  });
-}
-
-async function getUpload(user, id) {
-  const asset = notFound(await repo.findFirst('fileAsset', { where: { id, deletedAt: null } }));
-  if (asset.uploadedBy !== user.id && !(user.permissions || []).includes(PERMISSIONS.USERS_READ)) throw AppError.forbidden();
-  return asset;
-}
-
-async function deleteUpload(user, id) {
-  const asset = notFound(await repo.findFirst('fileAsset', { where: { id } }));
-  if (asset.uploadedBy !== user.id && !(user.permissions || []).includes(PERMISSIONS.USERS_DELETE)) throw AppError.forbidden();
-  const abs = path.join(process.cwd(), config.upload.dir, path.basename(asset.filePath));
-  await repo.update('fileAsset', { where: { id: asset.id }, data: { deletedAt: new Date() } });
-  try {
-    if (fs.existsSync(abs)) fs.unlinkSync(abs);
-  } catch {
-    /* ignore */
-  }
-}
-
-async function getInternalOverview() {
-  const [orders, users, providers, companies] = await Promise.all([
-    repo.count('order', { where: { deletedAt: null } }),
-    repo.count('user', { where: { deletedAt: null } }),
-    repo.count('provider', { where: { deletedAt: null } }),
-    repo.count('company', { where: { deletedAt: null } }),
-  ]);
-  return { orders, users, providers, companies };
-}
-
-async function getRevenueSummary() {
-  const agg = await repo.aggregate('invoice', { _sum: { totalAmount: true, paidAmount: true } });
-  return { totalInvoiced: agg._sum.totalAmount || 0, totalPaid: agg._sum.paidAmount || 0 };
-}
-
-const getInternalOrdersSummary = () => repo.groupBy('order', { by: ['status'], _count: { id: true }, where: { deletedAt: null } });
-const getCompanyOverview = async (tenantScope) => ({ orders: await repo.count('order', { where: { companyId: tenantScope.companyId, deletedAt: null } }) });
-const getCompanyOrdersSummary = (tenantScope) => repo.groupBy('order', { by: ['status'], where: { companyId: tenantScope.companyId, deletedAt: null }, _count: { id: true } });
-
-async function getProviderOverview(tenantScope) {
-  const [offers, assignments] = await Promise.all([
-    repo.count('offer', { where: { providerId: tenantScope.providerId } }),
-    repo.count('assignment', { where: { providerId: tenantScope.providerId } }),
-  ]);
-  return { offers, assignments };
-}
-
 async function getProviderPerformance(tenantScope) {
   const completed = await repo.count('assignment', { where: { providerId: tenantScope.providerId, status: 'completed' } });
   return { completedAssignments: completed };
@@ -362,8 +245,6 @@ async function getProviderEarningsSummary(tenantScope) {
   const wallet = await repo.findUnique('providerWallet', { where: { providerId: tenantScope.providerId } });
   return { commissions: agg._sum.amount || 0, wallet };
 }
-
-const listAuditLogs = (query) => repo.paginate('auditLog', parseListQuery(query, {}));
 
 module.exports = {
   listInvoices,
@@ -400,17 +281,6 @@ module.exports = {
   updatePermission,
   deletePermission,
   setRolePermissions,
-  getMyProfile,
-  updateMyProfile,
-  getMyCustomer,
-  updateMyCustomer,
-  listCustomerAddresses,
-  createCustomerAddress,
-  getCustomerAddress,
-  updateCustomerAddress,
-  deleteCustomerAddress,
-  listReviews,
-  createReview,
   listTickets,
   createTicket,
   getTicket,
@@ -426,16 +296,6 @@ module.exports = {
   createNotification,
   markNotificationRead,
   markAllNotificationsRead,
-  createUpload,
-  getUpload,
-  deleteUpload,
-  getInternalOverview,
-  getRevenueSummary,
-  getInternalOrdersSummary,
-  getCompanyOverview,
-  getCompanyOrdersSummary,
-  getProviderOverview,
   getProviderPerformance,
   getProviderEarningsSummary,
-  listAuditLogs,
 };

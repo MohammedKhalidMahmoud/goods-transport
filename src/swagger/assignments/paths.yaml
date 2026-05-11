@@ -1,0 +1,212 @@
+/assignments:
+  get:
+    tags:
+      - Assignments
+    summary: List assignments
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Paginated'
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+  post:
+    tags:
+      - Assignments
+    summary: Create assignment
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orderId
+              - providerId
+            properties:
+              orderId:
+                type: string
+                format: uuid
+              providerId:
+                type: string
+                format: uuid
+              driverId:
+                type: string
+                format: uuid
+                nullable: true
+/assignments/{id}:
+  get:
+    tags:
+      - Assignments
+    summary: Get assignment
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Assignments
+    summary: Update assignment status
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum:
+                  - pending
+                  - accepted
+                  - rejected
+                  - in_progress
+                  - completed
+                  - canceled
+              notes:
+                type: string
+                nullable: true
+  delete:
+    tags:
+      - Assignments
+    summary: Cancel assignment
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/assignments:
+  get:
+    tags:
+      - Admin Assignments
+    summary: List assignments
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Paginated'
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+  post:
+    tags:
+      - Admin Assignments
+    summary: Create assignment
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orderId
+              - providerId
+            properties:
+              orderId:
+                type: string
+                format: uuid
+              providerId:
+                type: string
+                format: uuid
+              driverId:
+                type: string
+                format: uuid
+                nullable: true
+/dashboard/assignments/{id}:
+  get:
+    tags:
+      - Admin Assignments
+    summary: Get assignment
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Admin Assignments
+    summary: Update assignment status
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum:
+                  - pending
+                  - accepted
+                  - rejected
+                  - in_progress
+                  - completed
+                  - canceled
+              notes:
+                type: string
+                nullable: true
+  delete:
+    tags:
+      - Admin Assignments
+    summary: Cancel assignment
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'

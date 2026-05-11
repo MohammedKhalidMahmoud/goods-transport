@@ -777,7 +777,7 @@ Documentation rules:
 
 Swagger documentation must be maintained as module-scoped YAML fragments under `src/swagger/<module>/`.
 
-The current `src/docs/*.swagger.js` annotation files are legacy documentation and should be migrated to YAML fragments. Do not add new Swagger documentation under `src/docs/`.
+JavaScript Swagger annotation files under `src/docs/*.swagger.js` are no longer part of the documentation standard. Do not add new Swagger documentation under `src/docs/`.
 
 A module folder may contain either or both files:
 

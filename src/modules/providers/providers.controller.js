@@ -21,11 +21,6 @@ class ProvidersController {
   updateProviderDocument = this.success((req) => providersService.updateSubResource('providerDocument', req.params.id, req.body, req.tenantScope));
   deleteProviderDocument = this.empty((req) => providersService.deleteSubResource('providerDocument', req.params.id, req.tenantScope), 'Deleted');
 
-  listProviderServiceAreas = this.paginated((req) => providersService.listSubResource('providerServiceArea', 'providerId', req.query, req.tenantScope));
-  createProviderServiceArea = this.created((req) => providersService.createSubResource('providerServiceArea', req.body, req.tenantScope));
-  updateProviderServiceArea = this.success((req) => providersService.updateSubResource('providerServiceArea', req.params.id, req.body, req.tenantScope));
-  deleteProviderServiceArea = this.empty((req) => providersService.deleteSubResource('providerServiceArea', req.params.id, req.tenantScope), 'Deleted');
-
   listProviderAvailability = this.paginated((req) => providersService.listSubResource('providerAvailability', 'providerId', req.query, req.tenantScope));
   createProviderAvailability = this.created((req) => providersService.createSubResource('providerAvailability', req.body, req.tenantScope));
 

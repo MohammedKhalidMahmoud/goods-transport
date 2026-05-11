@@ -1,0 +1,244 @@
+/tickets:
+  get:
+    tags:
+      - Tickets
+    summary: List tickets (tenant + RBAC scoped)
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Tickets
+    summary: Create ticket
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/tickets/{id}:
+  get:
+    tags:
+      - Tickets
+    summary: Get ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Tickets
+    summary: Update ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Tickets
+    summary: Delete ticket (super admin)
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/tickets/{id}/comments:
+  get:
+    tags:
+      - Tickets
+    summary: List comments
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Tickets
+    summary: Add comment
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '201':
+        description: Created
+/tickets/{id}/assign:
+  post:
+    tags:
+      - Tickets
+    summary: Assign ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/tickets/{id}/resolve:
+  post:
+    tags:
+      - Tickets
+    summary: Resolve ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/tickets/{id}/close:
+  post:
+    tags:
+      - Tickets
+    summary: Close ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/issue-types:
+  get:
+    tags:
+      - Tickets
+    summary: List issue types
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/tickets:
+  get:
+    tags:
+      - Admin Tickets
+    summary: List tickets (tenant + RBAC scoped)
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Tickets
+    summary: Create ticket
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/tickets/{id}:
+  get:
+    tags:
+      - Admin Tickets
+    summary: Get ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Tickets
+    summary: Update ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Tickets
+    summary: Delete ticket (super admin)
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/tickets/{id}/comments:
+  get:
+    tags:
+      - Admin Tickets
+    summary: List comments
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Tickets
+    summary: Add comment
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '201':
+        description: Created
+/dashboard/tickets/{id}/assign:
+  post:
+    tags:
+      - Admin Tickets
+    summary: Assign ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/tickets/{id}/resolve:
+  post:
+    tags:
+      - Admin Tickets
+    summary: Resolve ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/tickets/{id}/close:
+  post:
+    tags:
+      - Admin Tickets
+    summary: Close ticket
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/issue-types:
+  get:
+    tags:
+      - Admin Tickets
+    summary: List issue types
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK

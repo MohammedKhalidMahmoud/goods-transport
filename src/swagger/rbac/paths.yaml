@@ -1,0 +1,118 @@
+/dashboard/roles:
+  get:
+    tags:
+      - Admin RBAC
+    summary: List roles
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin RBAC
+    summary: Create role (super admin)
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/roles/{id}:
+  get:
+    tags:
+      - Admin RBAC
+    summary: Get role
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin RBAC
+    summary: Update role
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin RBAC
+    summary: Delete role
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/roles/{id}/permissions:
+  post:
+    tags:
+      - Admin RBAC
+    summary: Attach permissions to role
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/permissions:
+  get:
+    tags:
+      - Admin RBAC
+    summary: List permissions
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin RBAC
+    summary: Create permission
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/permissions/{id}:
+  get:
+    tags:
+      - Admin RBAC
+    summary: Get permission
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin RBAC
+    summary: Update permission
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin RBAC
+    summary: Delete permission
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK

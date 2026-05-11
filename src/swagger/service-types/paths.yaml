@@ -1,0 +1,234 @@
+/service-types:
+  get:
+    tags:
+      - Service Types
+    summary: List service types
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+      - $ref: '#/components/parameters/SortByQuery'
+      - $ref: '#/components/parameters/SortOrderQuery'
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: OK
+  post:
+    tags:
+      - Service Types
+    summary: Create service type
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - serviceCategoryId
+              - code
+              - name
+            properties:
+              serviceCategoryId:
+                type: string
+                format: uuid
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+/service-types/{id}:
+  get:
+    tags:
+      - Service Types
+    summary: Get service type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Service Types
+    summary: Update service type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              serviceCategoryId:
+                type: string
+                format: uuid
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+  delete:
+    tags:
+      - Service Types
+    summary: Delete service type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+/dashboard/service-types:
+  get:
+    tags:
+      - Admin Service Types
+    summary: List service types
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+      - $ref: '#/components/parameters/SortByQuery'
+      - $ref: '#/components/parameters/SortOrderQuery'
+    responses:
+      '200':
+        $ref: '#/components/responses/Paginated'
+        description: OK
+  post:
+    tags:
+      - Admin Service Types
+    summary: Create service type
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - serviceCategoryId
+              - code
+              - name
+            properties:
+              serviceCategoryId:
+                type: string
+                format: uuid
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+/dashboard/service-types/{id}:
+  get:
+    tags:
+      - Admin Service Types
+    summary: Get service type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Admin Service Types
+    summary: Update service type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              serviceCategoryId:
+                type: string
+                format: uuid
+              code:
+                type: string
+              name:
+                type: string
+              nameAr:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              sortOrder:
+                type: integer
+              isActive:
+                type: boolean
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+  delete:
+    tags:
+      - Admin Service Types
+    summary: Delete service type
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'

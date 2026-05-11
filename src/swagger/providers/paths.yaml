@@ -1,0 +1,758 @@
+/providers:
+  get:
+    tags:
+      - Providers
+    summary: List providers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Providers
+    summary: Create provider
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/providers/{id}:
+  get:
+    tags:
+      - Providers
+    summary: Get provider
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Providers
+    summary: Update provider
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Providers
+    summary: Soft-delete provider
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/providers/{id}/toggle-availability:
+  post:
+    tags:
+      - Providers
+    summary: Toggle accepting orders
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/provider-users:
+  get:
+    tags:
+      - Providers
+    summary: List provider users
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Providers
+    summary: Link user to provider
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/provider-users/{id}:
+  get:
+    tags:
+      - Providers
+    summary: Get provider user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Providers
+    summary: Update provider user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Providers
+    summary: Delete provider user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/provider-documents:
+  get:
+    tags:
+      - Providers
+    summary: List provider documents
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Providers
+    summary: Create document record
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/provider-documents/{id}:
+  get:
+    tags:
+      - Providers
+    summary: Get provider document by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Providers
+    summary: Update document
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Providers
+    summary: Delete document
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/provider-availability:
+  get:
+    tags:
+      - Providers
+    summary: List availability rows
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Providers
+    summary: Create availability row
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/provider-drivers:
+  get:
+    tags:
+      - Providers
+    summary: List drivers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Providers
+    summary: Create driver
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/provider-drivers/{id}:
+  get:
+    tags:
+      - Providers
+    summary: Get driver
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Providers
+    summary: Update driver
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Providers
+    summary: Delete driver
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/provider-workers:
+  get:
+    tags:
+      - Providers
+    summary: List workers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Providers
+    summary: Create worker
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/provider-workers/{id}:
+  get:
+    tags:
+      - Providers
+    summary: Get worker
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Providers
+    summary: Update worker
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Providers
+    summary: Delete worker
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/provider-vehicles:
+  get:
+    tags:
+      - Providers
+    summary: List vehicles
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Providers
+    summary: Create vehicle
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/provider-vehicles/{id}:
+  get:
+    tags:
+      - Providers
+    summary: Get vehicle
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Providers
+    summary: Update vehicle
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Providers
+    summary: Delete vehicle
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/provider-wallet:
+  get:
+    tags:
+      - Providers
+    summary: Provider wallet
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/provider-earnings:
+  get:
+    tags:
+      - Providers
+    summary: Earnings summary
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/provider-settlements:
+  get:
+    tags:
+      - Providers
+    summary: List settlements
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/providers:
+  get:
+    tags:
+      - Admin Providers
+    summary: List providers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Providers
+    summary: Create provider
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/providers/{id}:
+  get:
+    tags:
+      - Admin Providers
+    summary: Get provider
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Providers
+    summary: Update provider
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Providers
+    summary: Soft-delete provider
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/providers/{id}/toggle-availability:
+  post:
+    tags:
+      - Admin Providers
+    summary: Toggle accepting orders
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-users:
+  get:
+    tags:
+      - Admin Providers
+    summary: List provider users
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Providers
+    summary: Link user to provider
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/provider-users/{id}:
+  get:
+    tags:
+      - Admin Providers
+    summary: Get provider user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Providers
+    summary: Update provider user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Providers
+    summary: Delete provider user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-documents:
+  get:
+    tags:
+      - Admin Providers
+    summary: List provider documents
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Providers
+    summary: Create document record
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/provider-documents/{id}:
+  get:
+    tags:
+      - Admin Providers
+    summary: Get provider document by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Providers
+    summary: Update document
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Providers
+    summary: Delete document
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-availability:
+  get:
+    tags:
+      - Admin Providers
+    summary: List availability rows
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Providers
+    summary: Create availability row
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/provider-drivers:
+  get:
+    tags:
+      - Admin Providers
+    summary: List drivers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Providers
+    summary: Create driver
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/provider-drivers/{id}:
+  get:
+    tags:
+      - Admin Providers
+    summary: Get driver
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Providers
+    summary: Update driver
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Providers
+    summary: Delete driver
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-workers:
+  get:
+    tags:
+      - Admin Providers
+    summary: List workers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Providers
+    summary: Create worker
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/provider-workers/{id}:
+  get:
+    tags:
+      - Admin Providers
+    summary: Get worker
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Providers
+    summary: Update worker
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Providers
+    summary: Delete worker
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-vehicles:
+  get:
+    tags:
+      - Admin Providers
+    summary: List vehicles
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Providers
+    summary: Create vehicle
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/provider-vehicles/{id}:
+  get:
+    tags:
+      - Admin Providers
+    summary: Get vehicle
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Providers
+    summary: Update vehicle
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Providers
+    summary: Delete vehicle
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-wallet:
+  get:
+    tags:
+      - Admin Providers
+    summary: Provider wallet
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-earnings:
+  get:
+    tags:
+      - Admin Providers
+    summary: Earnings summary
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/provider-settlements:
+  get:
+    tags:
+      - Admin Providers
+    summary: List settlements
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK

@@ -1,0 +1,200 @@
+/delivery-proofs/{orderId}:
+  get:
+    tags:
+      - Delivery Proof
+    summary: List delivery proofs for order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Delivery Proof
+    summary: Create delivery proof
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '201':
+        description: Created
+/delivery-proofs/{id}:
+  patch:
+    tags:
+      - Delivery Proof
+    summary: Update delivery proof notes
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+    description: The path id is the delivery proof id.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              notes:
+                type: string
+                nullable: true
+  get:
+    tags:
+      - Delivery Proof
+    summary: List delivery proofs for order
+    description: For GET and POST, the path id is an order id. For PATCH, the path id is a delivery proof id.
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  post:
+    tags:
+      - Delivery Proof
+    summary: Create delivery proof for order
+    description: The path id is the order id.
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - type
+              - fileName
+              - filePath
+              - mimeType
+            properties:
+              type:
+                type: string
+                enum:
+                  - photo
+                  - signature
+                  - confirmation
+              fileName:
+                type: string
+              filePath:
+                type: string
+              mimeType:
+                type: string
+              notes:
+                type: string
+                nullable: true
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+/dashboard/delivery-proofs/{orderId}:
+  get:
+    tags:
+      - Admin Delivery Proof
+    summary: List delivery proofs for order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Delivery Proof
+    summary: Create delivery proof
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+    responses:
+      '201':
+        description: Created
+/dashboard/delivery-proofs/{id}:
+  patch:
+    tags:
+      - Admin Delivery Proof
+    summary: Update delivery proof notes
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+    description: The path id is the delivery proof id.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              notes:
+                type: string
+                nullable: true
+  get:
+    tags:
+      - Admin Delivery Proof
+    summary: List delivery proofs for order
+    description: For GET and POST, the path id is an order id. For PATCH, the path id is a delivery proof id.
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        $ref: '#/components/responses/Success'
+  post:
+    tags:
+      - Admin Delivery Proof
+    summary: Create delivery proof for order
+    description: The path id is the order id.
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - type
+              - fileName
+              - filePath
+              - mimeType
+            properties:
+              type:
+                type: string
+                enum:
+                  - photo
+                  - signature
+                  - confirmation
+              fileName:
+                type: string
+              filePath:
+                type: string
+              mimeType:
+                type: string
+              notes:
+                type: string
+                nullable: true
+    responses:
+      '201':
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'

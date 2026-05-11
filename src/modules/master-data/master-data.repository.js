@@ -5,9 +5,6 @@ const models = {
   serviceType: prisma.serviceType,
   vehicleType: prisma.vehicleType,
   city: prisma.city,
-  zone: prisma.zone,
-  area: prisma.area,
-  branch: prisma.branch,
   pricingSetting: prisma.pricingSetting,
   appSetting: prisma.appSetting,
 };
@@ -52,9 +49,6 @@ class MasterDataRepository {
     return prisma.serviceCategory.findUnique({ where: { id } });
   }
 
-  countAreasByCity(cityId) {
-    return prisma.area.count({ where: { cityId } });
-  }
 }
 
 module.exports = new MasterDataRepository();

@@ -1,0 +1,450 @@
+/companies:
+  get:
+    tags:
+      - Companies
+    summary: List companies (tenant scoped)
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Companies
+    summary: Create company
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/companies/{id}:
+  get:
+    tags:
+      - Companies
+    summary: Get company
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Companies
+    summary: Update company
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Companies
+    summary: Soft-delete company
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/company-users:
+  get:
+    tags:
+      - Companies
+    summary: List company users
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Companies
+    summary: Link user to company
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/company-users/{id}:
+  get:
+    tags:
+      - Companies
+    summary: Get company user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Companies
+    summary: Update company user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Companies
+    summary: Remove company user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/company-billing-profiles:
+  get:
+    tags:
+      - Companies
+    summary: List billing profiles
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Companies
+    summary: Create billing profile
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/company-billing-profiles/{id}:
+  patch:
+    tags:
+      - Companies
+    summary: Update billing profile
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/approval-rules:
+  get:
+    tags:
+      - Approvals
+    summary: List approval rules
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Approvals
+    summary: Create approval rule
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/approval-rules/{id}:
+  patch:
+    tags:
+      - Approvals
+    summary: Update approval rule
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Approvals
+    summary: Delete approval rule
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/approvals:
+  get:
+    tags:
+      - Approvals
+    summary: Pending approval orders queue
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/approvals/{id}:
+  get:
+    tags:
+      - Approvals
+    summary: Order pending approval (id = orderId)
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/approvals/{id}/approve:
+  post:
+    tags:
+      - Approvals
+    summary: Approve order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/approvals/{id}/reject:
+  post:
+    tags:
+      - Approvals
+    summary: Reject order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/companies:
+  get:
+    tags:
+      - Admin Companies
+    summary: List companies (tenant scoped)
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Companies
+    summary: Create company
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/companies/{id}:
+  get:
+    tags:
+      - Admin Companies
+    summary: Get company
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Companies
+    summary: Update company
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Companies
+    summary: Soft-delete company
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/company-users:
+  get:
+    tags:
+      - Admin Companies
+    summary: List company users
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Companies
+    summary: Link user to company
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/company-users/{id}:
+  get:
+    tags:
+      - Admin Companies
+    summary: Get company user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  patch:
+    tags:
+      - Admin Companies
+    summary: Update company user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Companies
+    summary: Remove company user
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/company-billing-profiles:
+  get:
+    tags:
+      - Admin Companies
+    summary: List billing profiles
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Companies
+    summary: Create billing profile
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/company-billing-profiles/{id}:
+  patch:
+    tags:
+      - Admin Companies
+    summary: Update billing profile
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/approval-rules:
+  get:
+    tags:
+      - Admin Companies
+    summary: List approval rules
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+  post:
+    tags:
+      - Admin Companies
+    summary: Create approval rule
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+/dashboard/approval-rules/{id}:
+  patch:
+    tags:
+      - Admin Companies
+    summary: Update approval rule
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+  delete:
+    tags:
+      - Admin Companies
+    summary: Delete approval rule
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/approvals:
+  get:
+    tags:
+      - Admin Companies
+    summary: Pending approval orders queue
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+/dashboard/approvals/{id}:
+  get:
+    tags:
+      - Admin Companies
+    summary: Order pending approval (id = orderId)
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/approvals/{id}/approve:
+  post:
+    tags:
+      - Admin Companies
+    summary: Approve order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+/dashboard/approvals/{id}/reject:
+  post:
+    tags:
+      - Admin Companies
+    summary: Reject order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK

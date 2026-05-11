@@ -14,7 +14,6 @@ const providerUpdateSchema = { params: Joi.object({ id: Joi.string().uuid().requ
 const availabilitySchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), dayOfWeek: Joi.number().integer().min(0).max(6).required(), startTime: Joi.string().required(), endTime: Joi.string().required() }) };
 const providerUserSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), userId: Joi.string().uuid().required(), role: Joi.string(), isActive: Joi.boolean() }) };
 const documentSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), documentType: Joi.string().required(), fileName: Joi.string().required(), originalName: Joi.string().required(), filePath: Joi.string().required(), mimeType: Joi.string().required(), fileSize: Joi.number().integer().required() }) };
-const serviceAreaSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), areaId: Joi.string().uuid().required() }) };
 const driverSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), name: Joi.string().required(), phone: Joi.string().required(), userId: Joi.string().uuid().allow(null), licenseNumber: Joi.string().allow('', null) }) };
 const workerSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), name: Joi.string().required(), phone: Joi.string().allow('', null) }) };
 const vehicleSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), vehicleTypeId: Joi.string().uuid().required(), plateNumber: Joi.string().required() }) };
@@ -37,11 +36,6 @@ router.post('/provider-documents', ...tenant, authorizePermissions(PERMISSIONS.P
 router.get('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.getProviderDocument);
 router.patch('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), providersController.updateProviderDocument);
 router.delete('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), providersController.deleteProviderDocument);
-
-router.get('/provider-service-areas', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderServiceAreas);
-router.post('/provider-service-areas', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(serviceAreaSchema), providersController.createProviderServiceArea);
-router.patch('/provider-service-areas/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.updateProviderServiceArea);
-router.delete('/provider-service-areas/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.deleteProviderServiceArea);
 
 router.get('/provider-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderAvailability);
 router.post('/provider-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(availabilitySchema), providersController.createProviderAvailability);

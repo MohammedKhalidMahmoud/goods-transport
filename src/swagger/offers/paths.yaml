@@ -1,0 +1,318 @@
+/offers:
+  get:
+    tags:
+      - Offers
+    summary: List offers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Paginated'
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+  post:
+    tags:
+      - Offers
+    summary: Create provider offer
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orderId
+              - price
+            properties:
+              orderId:
+                type: string
+                format: uuid
+              price:
+                type: number
+              estimatedDuration:
+                type: string
+                nullable: true
+              notes:
+                type: string
+                nullable: true
+              validUntil:
+                type: string
+                format: date-time
+                nullable: true
+/offers/{id}:
+  get:
+    tags:
+      - Offers
+    summary: Get offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Offers
+    summary: Update pending offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              price:
+                type: number
+              notes:
+                type: string
+                nullable: true
+              validUntil:
+                type: string
+                format: date-time
+                nullable: true
+  delete:
+    tags:
+      - Offers
+    summary: Withdraw pending offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+/offers/{id}/accept:
+  post:
+    tags:
+      - Offers
+    summary: Accept offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+/offers/{id}/reject:
+  post:
+    tags:
+      - Offers
+    summary: Reject offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/offers/{id}/withdraw:
+  post:
+    tags:
+      - Offers
+    summary: Withdraw offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/offers:
+  get:
+    tags:
+      - Admin Offers
+    summary: List offers
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Paginated'
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+  post:
+    tags:
+      - Admin Offers
+    summary: Create provider offer
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orderId
+              - price
+            properties:
+              orderId:
+                type: string
+                format: uuid
+              price:
+                type: number
+              estimatedDuration:
+                type: string
+                nullable: true
+              notes:
+                type: string
+                nullable: true
+              validUntil:
+                type: string
+                format: date-time
+                nullable: true
+/dashboard/offers/{id}:
+  get:
+    tags:
+      - Admin Offers
+    summary: Get offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
+    tags:
+      - Admin Offers
+    summary: Update pending offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              price:
+                type: number
+              notes:
+                type: string
+                nullable: true
+              validUntil:
+                type: string
+                format: date-time
+                nullable: true
+  delete:
+    tags:
+      - Admin Offers
+    summary: Withdraw pending offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+/dashboard/offers/{id}/accept:
+  post:
+    tags:
+      - Admin Offers
+    summary: Accept offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+      '422':
+        $ref: '#/components/responses/Unprocessable'
+/dashboard/offers/{id}/reject:
+  post:
+    tags:
+      - Admin Offers
+    summary: Reject offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/offers/{id}/withdraw:
+  post:
+    tags:
+      - Admin Offers
+    summary: Withdraw offer
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'

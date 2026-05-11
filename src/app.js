@@ -4,8 +4,6 @@ const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
 const swaggerUi = require('swagger-ui-express');
-const path = require('path');
-const fs = require('fs');
 
 const { config } = require('./config');
 const { swaggerSpec } = require('./config/swagger');
@@ -33,13 +31,6 @@ if (config.env !== 'test') {
 
 // Rate limiting
 app.use('/api/', globalLimiter);
-
-// Static files (uploads)
-const uploadsDir = path.resolve(config.upload.dir);
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-app.use('/uploads', express.static(uploadsDir));
 
 // Swagger docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

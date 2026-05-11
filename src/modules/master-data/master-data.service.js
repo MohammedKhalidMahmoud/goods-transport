@@ -30,33 +30,6 @@ const definitions = {
     searchFields: ['name', 'code'],
     notFound: 'City not found',
   },
-  zone: {
-    model: 'zone',
-    searchFields: ['name', 'code'],
-    notFound: 'Zone not found',
-  },
-  area: {
-    model: 'area',
-    searchFields: ['name', 'code'],
-    notFound: 'Area not found',
-    beforeList(query, lq) {
-      if (query.cityId) lq.where.cityId = query.cityId;
-      if (query.zoneId) lq.where.zoneId = query.zoneId;
-    },
-  },
-  branch: {
-    model: 'branch',
-    searchFields: ['name'],
-    notFound: 'Branch not found',
-    include: { provider: { select: { id: true, name: true, nameAr: true } } },
-    beforeList(query, lq, tenantScope) {
-      if (tenantScope?.type === 'provider') {
-        lq.where.providerId = tenantScope.providerId;
-      } else if (query.providerId) {
-        lq.where.providerId = query.providerId;
-      }
-    },
-  },
   pricingSetting: {
     model: 'pricingSetting',
     searchFields: ['serviceTypeCode'],
@@ -92,38 +65,23 @@ async function getResource(name, id) {
 }
 
 async function createResource(name, data, tenantScope) {
-  if (name === 'branch' && tenantScope?.type === 'provider' && data.providerId !== tenantScope.providerId) {
-    throw AppError.forbidden('Cannot create branch for another provider');
-  }
-
   const def = definition(name);
   if (def.beforeCreate) await def.beforeCreate(data);
   return repository.create(def.model, data);
 }
 
 async function updateResource(name, id, data, tenantScope) {
-  const existing = await getResource(name, id);
-  if (name === 'branch' && tenantScope?.type === 'provider' && existing.providerId !== tenantScope.providerId) {
-    throw AppError.forbidden();
-  }
+  await getResource(name, id);
   const def = definition(name);
   return repository.update(def.model, id, data);
 }
 
 async function deleteResource(name, id, tenantScope) {
-  const existing = await getResource(name, id);
-  if (name === 'branch' && tenantScope?.type === 'provider' && existing.providerId !== tenantScope.providerId) {
-    throw AppError.forbidden();
-  }
+  await getResource(name, id);
 
   if (name === 'category') {
     const count = await repository.countServiceTypesByCategory(id);
     if (count > 0) throw AppError.conflict('Cannot delete category with service types');
-  }
-
-  if (name === 'city') {
-    const count = await repository.countAreasByCity(id);
-    if (count > 0) throw AppError.conflict('City has areas');
   }
 
   const def = definition(name);
@@ -143,9 +101,6 @@ const aliases = {
   ServiceType: 'serviceType',
   VehicleType: 'vehicleType',
   City: 'city',
-  Zone: 'zone',
-  Area: 'area',
-  Branch: 'branch',
   PricingSetting: 'pricingSetting',
   AppSetting: 'appSetting',
 };
