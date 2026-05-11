@@ -1,5 +1,6 @@
 const { describe, it, after } = require('node:test');
 const assert = require('node:assert/strict');
+const jwt = require('jsonwebtoken');
 const request = require('supertest');
 
 const app = require('../src/app');
@@ -58,6 +59,29 @@ describe(
       });
       assert.equal(login.status, 200);
       const token = login.body.data.accessToken;
+      const accessPayload = jwt.decode(token);
+      assert.equal(accessPayload?.role, 'CUSTOMER');
+      assert.equal(accessPayload?.audience, 'APP');
+      assert.equal(login.body.data.user.role, 'CUSTOMER');
+      assert.equal(login.body.data.user.permissions, undefined);
+      const refreshToken = login.body.data.refreshToken;
+      assert.equal(typeof refreshToken, 'string');
+      assert.equal(refreshToken.split('.').length, 3);
+      const refreshPayload = jwt.decode(refreshToken);
+      assert.equal(refreshPayload?.type, 'refresh');
+      assert.equal(refreshPayload?.userId, login.body.data.user.id);
+      assert.equal(refreshPayload?.audience, 'APP');
+
+      const refresh = await request(app).post('/api/v1/auth/refresh').send({ refreshToken });
+      assert.equal(refresh.status, 200);
+      assert.equal(typeof refresh.body.data?.accessToken, 'string');
+      assert.equal(typeof refresh.body.data?.refreshToken, 'string');
+      assert.equal(refresh.body.data.refreshToken.split('.').length, 3);
+      assert.notEqual(refresh.body.data.refreshToken, refreshToken);
+
+      const reused = await request(app).post('/api/v1/auth/refresh').send({ refreshToken });
+      assert.equal(reused.status, 401);
+
       const st = await prisma.serviceType.findUnique({ where: { code: 'local_moving' } });
       assert.ok(st);
       const res = await request(app)
@@ -76,13 +100,20 @@ describe(
     });
 
     it('admin can list offers for demo order', async () => {
-      const login = await request(app).post('/api/v1/auth/login').send({
+      const login = await request(app).post('/api/v1/dashboard/auth/login').send({
         identifier: 'admin@goodstransfer.com',
         password: 'Admin@123',
       });
       assert.equal(login.status, 200);
       const token = login.body.data.accessToken;
-      const res = await request(app).get('/api/v1/offers').set('Authorization', `Bearer ${token}`);
+      const payload = jwt.decode(token);
+      assert.equal(payload?.audience, 'DASHBOARD');
+      assert.equal(payload?.myAdmin, true);
+      const me = await request(app).get('/api/v1/dashboard/auth/me').set('Authorization', `Bearer ${token}`);
+      assert.equal(me.status, 200);
+      assert.equal(me.body.data.myAdmin, true);
+      assert.equal(Object.prototype.hasOwnProperty.call(me.body.data, 'permissions'), false);
+      const res = await request(app).get('/api/v1/dashboard/offers').set('Authorization', `Bearer ${token}`);
       assert.equal(res.status, 200);
       assert.ok(Array.isArray(res.body.data));
     });

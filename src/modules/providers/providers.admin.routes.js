@@ -1,13 +1,13 @@
 const { Router } = require('express');
 const Joi = require('joi');
 const providersController = require('./providers.controller');
-const { authenticate } = require('../../middlewares/auth');
+const { authenticateDashboard } = require('../../middlewares/auth');
 const { authorizePermissions, resolveTenantScope } = require('../../middlewares/authorize');
 const { validate } = require('../../middlewares/validate');
 const { PERMISSIONS } = require('../../constants/permissions');
 
 const router = Router();
-const tenant = [authenticate, resolveTenantScope];
+const tenant = [authenticateDashboard, resolveTenantScope];
 
 const providerCreateSchema = { body: Joi.object({ name: Joi.string().required(), contactEmail: Joi.string().email().required(), contactPhone: Joi.string().required(), nameAr: Joi.string().allow('', null), address: Joi.string().allow('', null), taxNumber: Joi.string().allow('', null), licenseNumber: Joi.string().allow('', null) }) };
 const providerUpdateSchema = { params: Joi.object({ id: Joi.string().uuid().required() }), body: Joi.object({ name: Joi.string(), nameAr: Joi.string().allow('', null), contactEmail: Joi.string().email(), contactPhone: Joi.string(), address: Joi.string().allow('', null), taxNumber: Joi.string().allow('', null), licenseNumber: Joi.string().allow('', null), status: Joi.string(), isVerified: Joi.boolean(), isAcceptingOrders: Joi.boolean() }).min(1) };
@@ -25,45 +25,37 @@ router.get('/providers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDE
 router.patch('/providers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE, PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(providerUpdateSchema), providersController.updateProvider);
 router.delete('/providers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_DELETE), providersController.deleteProvider);
 router.post('/providers/:id/toggle-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN, PERMISSIONS.PROVIDERS_UPDATE), providersController.toggleAvailability);
-
 router.get('/provider-users', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderUsers);
 router.post('/provider-users', ...tenant, authorizePermissions(PERMISSIONS.USERS_CREATE, PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(providerUserSchema), providersController.createProviderUser);
 router.get('/provider-users/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderUser);
 router.patch('/provider-users/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.updateProviderUser);
 router.delete('/provider-users/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.deleteProviderUser);
-
 router.get('/provider-documents', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderDocuments);
 router.post('/provider-documents', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), validate(documentSchema), providersController.createProviderDocument);
 router.get('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.getProviderDocument);
 router.patch('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), providersController.updateProviderDocument);
 router.delete('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), providersController.deleteProviderDocument);
-
 router.get('/provider-service-areas', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderServiceAreas);
 router.post('/provider-service-areas', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(serviceAreaSchema), providersController.createProviderServiceArea);
 router.patch('/provider-service-areas/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.updateProviderServiceArea);
 router.delete('/provider-service-areas/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.deleteProviderServiceArea);
-
 router.get('/provider-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderAvailability);
 router.post('/provider-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(availabilitySchema), providersController.createProviderAvailability);
-
 router.get('/provider-drivers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderDrivers);
 router.post('/provider-drivers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), validate(driverSchema), providersController.createProviderDriver);
 router.get('/provider-drivers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderDriver);
 router.patch('/provider-drivers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.updateProviderDriver);
 router.delete('/provider-drivers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.deleteProviderDriver);
-
 router.get('/provider-workers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderWorkers);
 router.post('/provider-workers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), validate(workerSchema), providersController.createProviderWorker);
 router.get('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderWorker);
 router.patch('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.updateProviderWorker);
 router.delete('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.deleteProviderWorker);
-
 router.get('/provider-vehicles', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderVehicles);
 router.post('/provider-vehicles', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), validate(vehicleSchema), providersController.createProviderVehicle);
 router.get('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderVehicle);
 router.patch('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), providersController.updateProviderVehicle);
 router.delete('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), providersController.deleteProviderVehicle);
-
 router.get('/provider-wallet', ...tenant, authorizePermissions(PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.getWallet);
 router.get('/provider-earnings', ...tenant, authorizePermissions(PERMISSIONS.ANALYTICS_READ_PROVIDER, PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.getEarnings);
 router.get('/provider-settlements', ...tenant, authorizePermissions(PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.listSettlements);

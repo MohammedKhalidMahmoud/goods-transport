@@ -4,60 +4,21 @@ class AuthRepository {
   async findUserByEmail(email) {
     return prisma.user.findUnique({
       where: { email },
-      include: {
-        userRoles: {
-          include: {
-            role: {
-              include: {
-                rolePermissions: {
-                  include: { permission: true },
-                },
-              },
-            },
-          },
-        },
-        profile: true,
-      },
+      include: this._userAuthInclude(),
     });
   }
 
   async findUserByPhone(phone) {
     return prisma.user.findUnique({
       where: { phone },
-      include: {
-        userRoles: {
-          include: {
-            role: {
-              include: {
-                rolePermissions: {
-                  include: { permission: true },
-                },
-              },
-            },
-          },
-        },
-        profile: true,
-      },
+      include: this._userAuthInclude(),
     });
   }
 
   async findUserById(id) {
     return prisma.user.findUnique({
       where: { id },
-      include: {
-        userRoles: {
-          include: {
-            role: {
-              include: {
-                rolePermissions: {
-                  include: { permission: true },
-                },
-              },
-            },
-          },
-        },
-        profile: true,
-      },
+      include: this._userAuthInclude(),
     });
   }
 
@@ -73,7 +34,7 @@ class AuthRepository {
   }
 
   async deleteRefreshToken(token) {
-    return prisma.refreshToken.delete({
+    return prisma.refreshToken.deleteMany({
       where: { token },
     });
   }
@@ -81,6 +42,20 @@ class AuthRepository {
   async deleteAllUserRefreshTokens(userId) {
     return prisma.refreshToken.deleteMany({
       where: { userId },
+    });
+  }
+
+  async rotateRefreshToken(currentToken, nextTokenData) {
+    return prisma.$transaction(async (tx) => {
+      const deleted = await tx.refreshToken.deleteMany({
+        where: { token: currentToken },
+      });
+
+      if (deleted.count !== 1) {
+        return null;
+      }
+
+      return tx.refreshToken.create({ data: nextTokenData });
     });
   }
 
@@ -167,6 +142,23 @@ class AuthRepository {
       where: { id },
       data: { verifiedAt: new Date() },
     });
+  }
+
+  _userAuthInclude() {
+    return {
+      dashboardProfile: {
+        include: {
+          role: {
+            include: {
+              rolePermissions: {
+                include: { permission: true },
+              },
+            },
+          },
+        },
+      },
+      providerProfile: true,
+    };
   }
 }
 

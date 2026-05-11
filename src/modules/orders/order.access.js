@@ -1,29 +1,14 @@
-const { prisma } = require('../../lib/prisma');
 const { INTERNAL_ROLES } = require('../../constants/roles');
+const ordersRepository = require('./orders.repository');
 
 async function loadOrderForAccess(orderId) {
-  return prisma.order.findFirst({
-    where: { id: orderId, deletedAt: null },
-    include: {
-      serviceType: true,
-      vehicleType: true,
-      requester: { include: { profile: true } },
-      locations: true,
-      items: true,
-      attachments: true,
-      offers: true,
-      assignments: {
-        include: { driver: true },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-      },
-    },
-  });
+  return ordersRepository.loadOrderForAccess(orderId);
 }
 
 function canViewOrder(user, tenantScope, order) {
   if (!order) return false;
-  if (user.roles.some((r) => INTERNAL_ROLES.includes(r))) return true;
+  const roles = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
+  if (roles.some((r) => INTERNAL_ROLES.includes(r))) return true;
   if (tenantScope.type === 'company' && order.companyId === tenantScope.companyId) return true;
   if (tenantScope.type === 'self' && order.requesterId === user.id) return true;
   if (tenantScope.type === 'provider' && tenantScope.providerId) {
@@ -42,10 +27,7 @@ function canViewOrder(user, tenantScope, order) {
 
 /** Driver check: assignment links driver record with userId */
 async function canDriverViewOrder(userId, order) {
-  const driverRows = await prisma.providerDriver.findMany({
-    where: { userId, isActive: true },
-    select: { id: true },
-  });
+  const driverRows = await ordersRepository.findActiveDriverIdsByUser(userId);
   const ids = driverRows.map((d) => d.id);
   if (ids.length === 0) return false;
   return order.assignments?.some((a) => a.driverId && ids.includes(a.driverId));

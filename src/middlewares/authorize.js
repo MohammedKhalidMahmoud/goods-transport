@@ -1,5 +1,40 @@
 const { AppError } = require('../utils/AppError');
 const { buildTenantScopeFromUser, assertTenantClaimsMatchRoles } = require('../utils/tenantScope');
+const { PERMISSIONS } = require('../constants/permissions');
+
+const APP_ROLE_PERMISSIONS = {
+  CUSTOMER: new Set([
+    PERMISSIONS.ORDERS_CREATE,
+    PERMISSIONS.ORDERS_READ_OWN,
+    PERMISSIONS.ORDERS_UPDATE_OWN,
+    PERMISSIONS.ORDERS_SUBMIT,
+    PERMISSIONS.ORDERS_CANCEL,
+    PERMISSIONS.OFFERS_READ_OWN,
+    PERMISSIONS.OFFERS_ACCEPT,
+    PERMISSIONS.OFFERS_REJECT,
+    PERMISSIONS.TICKETS_CREATE,
+    PERMISSIONS.TICKETS_READ_OWN,
+    PERMISSIONS.NOTIFICATIONS_READ_OWN,
+    PERMISSIONS.USERS_READ_OWN,
+    PERMISSIONS.USERS_UPDATE_OWN,
+    PERMISSIONS.MASTER_DATA_READ,
+  ]),
+  PROVIDER: new Set([
+    PERMISSIONS.ORDERS_READ_PROVIDER,
+    PERMISSIONS.OFFERS_READ_OWN,
+    PERMISSIONS.OFFERS_CREATE,
+    PERMISSIONS.OFFERS_WITHDRAW,
+    PERMISSIONS.ASSIGNMENTS_READ_PROVIDER,
+    PERMISSIONS.ASSIGNMENTS_READ_OWN,
+    PERMISSIONS.ASSIGNMENTS_UPDATE_STATUS,
+    PERMISSIONS.PROVIDERS_READ_OWN,
+    PERMISSIONS.PROVIDERS_UPDATE_OWN,
+    PERMISSIONS.NOTIFICATIONS_READ_OWN,
+    PERMISSIONS.USERS_READ_OWN,
+    PERMISSIONS.USERS_UPDATE_OWN,
+    PERMISSIONS.MASTER_DATA_READ,
+  ]),
+};
 
 /**
  * Middleware to check if the authenticated user has at least one of the required roles.
@@ -13,7 +48,10 @@ function authorizeRoles(...allowedRoles) {
       throw AppError.unauthorized('Authentication required');
     }
 
-    const hasRole = req.user.roles.some((role) => allowedRoles.includes(role));
+    const userRoles = Array.isArray(req.user.roles)
+      ? req.user.roles
+      : [req.user.role].filter(Boolean);
+    const hasRole = userRoles.some((role) => allowedRoles.includes(role));
     if (!hasRole) {
       throw AppError.forbidden('You do not have the required role to access this resource');
     }
@@ -34,11 +72,39 @@ function authorizePermissions(...requiredPermissions) {
       throw AppError.unauthorized('Authentication required');
     }
 
-    const hasPermission = req.user.permissions.some((perm) =>
+    if (req.user.myAdmin) {
+      return next();
+    }
+
+    if (req.user.userType === 'APP') {
+      const allowed = APP_ROLE_PERMISSIONS[req.user.role] || new Set();
+      const hasAppPermission = requiredPermissions.some((permission) => allowed.has(permission));
+      if (hasAppPermission) {
+        return next();
+      }
+      throw AppError.forbidden('You do not have the required permission');
+    }
+
+    const permissions = Array.isArray(req.user.permissions) ? req.user.permissions : [];
+    const hasPermission = permissions.some((perm) =>
       requiredPermissions.includes(perm)
     );
     if (!hasPermission) {
       throw AppError.forbidden('You do not have the required permission');
+    }
+
+    next();
+  };
+}
+
+function requireAppRole(...allowedRoles) {
+  return (req, _res, next) => {
+    if (!req.user) {
+      throw AppError.unauthorized('Authentication required');
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      throw AppError.forbidden('You do not have the required role to access this resource');
     }
 
     next();
@@ -91,6 +157,7 @@ function enforceTenantParam(paramName) {
 module.exports = {
   authorizeRoles,
   authorizePermissions,
+  requireAppRole,
   resolveTenantScope,
   enforceTenantParam,
 };

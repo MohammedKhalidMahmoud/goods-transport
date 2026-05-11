@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { authenticate } = require('../../middlewares/auth');
+const { authenticateDashboard } = require('../../middlewares/auth');
 const { authorizePermissions, resolveTenantScope } = require('../../middlewares/authorize');
 const { validate } = require('../../middlewares/validate');
 const { PERMISSIONS } = require('../../constants/permissions');
@@ -8,10 +8,10 @@ const v = require('./master-data.validation');
 
 const router = Router();
 
-const read = [authenticate, authorizePermissions(PERMISSIONS.MASTER_DATA_READ)];
-const write = [authenticate, authorizePermissions(PERMISSIONS.MASTER_DATA_MANAGE)];
+const read = [authenticateDashboard, authorizePermissions(PERMISSIONS.MASTER_DATA_READ)];
+const write = [authenticateDashboard, authorizePermissions(PERMISSIONS.MASTER_DATA_MANAGE)];
 const branchWrite = [
-  authenticate,
+  authenticateDashboard,
   authorizePermissions(PERMISSIONS.MASTER_DATA_MANAGE, PERMISSIONS.SETTINGS_MANAGE_PROVIDER),
 ];
 

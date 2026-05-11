@@ -1,13 +1,13 @@
 const { Router } = require('express');
 const Joi = require('joi');
 const operationsController = require('./operations.controller');
-const { authenticate } = require('../../middlewares/auth');
+const { authenticateDashboard } = require('../../middlewares/auth');
 const { authorizePermissions, resolveTenantScope } = require('../../middlewares/authorize');
 const { validate } = require('../../middlewares/validate');
 const { PERMISSIONS } = require('../../constants/permissions');
 
 const router = Router();
-const tenant = [authenticate, resolveTenantScope];
+const tenant = [authenticateDashboard, resolveTenantScope];
 
 const offerCreateSchema = {
   body: Joi.object({

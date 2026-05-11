@@ -1,13 +1,13 @@
 const { Router } = require('express');
 const Joi = require('joi');
-const { authenticate } = require('../../middlewares/auth');
+const { authenticateDashboard } = require('../../middlewares/auth');
 const { authorizePermissions, resolveTenantScope } = require('../../middlewares/authorize');
 const { validate } = require('../../middlewares/validate');
 const { PERMISSIONS } = require('../../constants/permissions');
 const ordersController = require('./orders.controller');
 
 const router = Router();
-const tenant = [authenticate, resolveTenantScope];
+const tenant = [authenticateDashboard, resolveTenantScope];
 
 const orderCreate = Joi.object({
   sourceType: Joi.string().valid('individual', 'company'),
@@ -101,7 +101,6 @@ router.delete(
 );
 
 router.get('/orders/:id/timeline', ...tenant, ordersController.getTimeline);
-
 router.get('/orders/:id/attachments', ...tenant, ordersController.listAttachments);
 
 router.post(

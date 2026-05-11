@@ -317,17 +317,17 @@ async function main() {
   const testPasswordHash = await bcrypt.hash('Test@123', 12);
 
   const usersData = [
-    { email: 'admin@goodstransfer.com', phone: '+966500000001', hash: passwordHash, firstName: 'Super', lastName: 'Admin', roleCode: 'super_admin' },
-    { email: 'ops@goodstransfer.com', phone: '+966500000002', hash: passwordHash, firstName: 'Operations', lastName: 'Admin', roleCode: 'operations_admin' },
-    { email: 'support@goodstransfer.com', phone: '+966500000003', hash: passwordHash, firstName: 'Support', lastName: 'Admin', roleCode: 'support_admin' },
-    { email: 'finance@goodstransfer.com', phone: '+966500000004', hash: passwordHash, firstName: 'Finance', lastName: 'Admin', roleCode: 'finance_admin' },
-    { email: 'company@test.com', phone: '+966500000005', hash: testPasswordHash, firstName: 'Company', lastName: 'Admin', roleCode: 'company_admin' },
-    { email: 'employee@test.com', phone: '+966500000006', hash: testPasswordHash, firstName: 'Test', lastName: 'Employee', roleCode: 'employee' },
-    { email: 'manager@test.com', phone: '+966500000007', hash: testPasswordHash, firstName: 'Test', lastName: 'Manager', roleCode: 'line_manager' },
-    { email: 'provider@test.com', phone: '+966500000008', hash: testPasswordHash, firstName: 'Provider', lastName: 'Admin', roleCode: 'provider_admin' },
-    { email: 'operator@test.com', phone: '+966500000009', hash: testPasswordHash, firstName: 'Test', lastName: 'Operator', roleCode: 'provider_operator' },
-    { email: 'customer@test.com', phone: '+966500000010', hash: testPasswordHash, firstName: 'Test', lastName: 'Customer', roleCode: 'individual_customer' },
-    { email: 'driver@test.com', phone: '+966500000011', hash: testPasswordHash, firstName: 'Test', lastName: 'Driver', roleCode: 'delivery_driver' },
+    { email: 'admin@goodstransfer.com', phone: '+966500000001', hash: passwordHash, firstName: 'Super', lastName: 'Admin', roleCode: 'super_admin', userType: 'DASHBOARD', myAdmin: true, jobTitle: 'Platform Admin' },
+    { email: 'ops@goodstransfer.com', phone: '+966500000002', hash: passwordHash, firstName: 'Operations', lastName: 'Admin', roleCode: 'operations_admin', userType: 'DASHBOARD', jobTitle: 'Operations Admin' },
+    { email: 'support@goodstransfer.com', phone: '+966500000003', hash: passwordHash, firstName: 'Support', lastName: 'Admin', roleCode: 'support_admin', userType: 'DASHBOARD', jobTitle: 'Support Admin' },
+    { email: 'finance@goodstransfer.com', phone: '+966500000004', hash: passwordHash, firstName: 'Finance', lastName: 'Admin', roleCode: 'finance_admin', userType: 'DASHBOARD', jobTitle: 'Finance Admin' },
+    { email: 'company@test.com', phone: '+966500000005', hash: testPasswordHash, firstName: 'Company', lastName: 'Admin', roleCode: 'company_admin', userType: 'DASHBOARD', jobTitle: 'Company Admin' },
+    { email: 'employee@test.com', phone: '+966500000006', hash: testPasswordHash, firstName: 'Test', lastName: 'Employee', roleCode: 'employee', userType: 'DASHBOARD', jobTitle: 'Employee' },
+    { email: 'manager@test.com', phone: '+966500000007', hash: testPasswordHash, firstName: 'Test', lastName: 'Manager', roleCode: 'line_manager', userType: 'DASHBOARD', jobTitle: 'Line Manager' },
+    { email: 'provider@test.com', phone: '+966500000008', hash: testPasswordHash, firstName: 'Provider', lastName: 'Admin', roleCode: 'provider_admin', userType: 'APP', appRole: 'PROVIDER' },
+    { email: 'operator@test.com', phone: '+966500000009', hash: testPasswordHash, firstName: 'Test', lastName: 'Operator', roleCode: 'provider_operator', userType: 'APP', appRole: 'PROVIDER' },
+    { email: 'customer@test.com', phone: '+966500000010', hash: testPasswordHash, firstName: 'Test', lastName: 'Customer', roleCode: 'individual_customer', userType: 'APP', appRole: 'CUSTOMER' },
+    { email: 'driver@test.com', phone: '+966500000011', hash: testPasswordHash, firstName: 'Test', lastName: 'Driver', roleCode: 'delivery_driver', userType: 'APP', appRole: 'PROVIDER' },
   ];
 
   const users = {};
@@ -339,27 +339,22 @@ async function main() {
       update: {
         passwordHash: userData.hash,
         phone: userData.phone,
-        status: 'active',
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        userType: userData.userType,
+        appRole: userData.appRole || null,
+        status: 'ACTIVE',
         deletedAt: null,
       },
       create: {
         email: userData.email,
         phone: userData.phone,
         passwordHash: userData.hash,
-        status: 'active',
-      },
-    });
-
-    await prisma.profile.upsert({
-      where: { userId: user.id },
-      update: {
         firstName: userData.firstName,
         lastName: userData.lastName,
-      },
-      create: {
-        userId: user.id,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+        userType: userData.userType,
+        appRole: userData.appRole || null,
+        status: 'ACTIVE',
       },
     });
 
@@ -369,6 +364,23 @@ async function main() {
       update: {},
       create: { userId: user.id, roleId: role.id },
     });
+
+    if (userData.userType === 'DASHBOARD') {
+      await prisma.dashboardUserProfile.upsert({
+        where: { userId: user.id },
+        update: {
+          roleId: role.id,
+          myAdmin: Boolean(userData.myAdmin),
+          jobTitle: userData.jobTitle || null,
+        },
+        create: {
+          userId: user.id,
+          roleId: role.id,
+          myAdmin: Boolean(userData.myAdmin),
+          jobTitle: userData.jobTitle || null,
+        },
+      });
+    }
 
     users[userData.roleCode] = user;
   }
@@ -447,6 +459,24 @@ async function main() {
   // Link provider users
   for (const roleCode of ['provider_admin', 'provider_operator']) {
     const user = users[roleCode];
+    await prisma.providerProfile.upsert({
+      where: { userId: user.id },
+      update: {
+        businessName: provider.name,
+        logoUrl: provider.logoUrl,
+        address: provider.address,
+        taxNumber: provider.taxNumber,
+        licenseNumber: provider.licenseNumber,
+      },
+      create: {
+        userId: user.id,
+        businessName: provider.name,
+        logoUrl: provider.logoUrl,
+        address: provider.address,
+        taxNumber: provider.taxNumber,
+        licenseNumber: provider.licenseNumber,
+      },
+    });
     await prisma.providerUser.upsert({
       where: { providerId_userId: { providerId: provider.id, userId: user.id } },
       update: {},

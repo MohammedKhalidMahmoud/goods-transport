@@ -3,24 +3,48 @@ const { config } = require('../config');
 const { AppError } = require('../utils/AppError');
 const { prisma } = require('../lib/prisma');
 
-/**
- * Authenticate the request by verifying the JWT access token.
- * Attaches user, roles, permissions, and tenant context to req.
- */
+const USER_STATUS = {
+  ACTIVE: 'ACTIVE',
+};
+
+const USER_TYPE = {
+  APP: 'APP',
+  DASHBOARD: 'DASHBOARD',
+};
+
+async function authenticateApp(req, _res, next) {
+  return authenticateAudience(USER_TYPE.APP, req, next);
+}
+
+async function authenticateDashboard(req, _res, next) {
+  return authenticateAudience(USER_TYPE.DASHBOARD, req, next);
+}
+
 async function authenticate(req, _res, next) {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw AppError.unauthorized('Access token is required');
+    const decoded = verifyBearerToken(req);
+    const audience = decoded.audience === USER_TYPE.APP ? USER_TYPE.APP : USER_TYPE.DASHBOARD;
+    return authenticateAudience(audience, req, next);
+  } catch (err) {
+    if (err instanceof AppError) return next(err);
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return next(err);
     }
+    next(AppError.unauthorized('Authentication failed'));
+  }
+}
 
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, config.jwt.accessSecret);
+async function authenticateAudience(audience, req, next) {
+  try {
+    const decoded = verifyBearerToken(req);
+    if (decoded.audience !== audience) {
+      throw AppError.unauthorized('Invalid access token');
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       include: {
-        userRoles: {
+        dashboardProfile: {
           include: {
             role: {
               include: {
@@ -31,33 +55,17 @@ async function authenticate(req, _res, next) {
             },
           },
         },
+        providerProfile: true,
       },
     });
 
-    if (!user || user.status !== 'active' || user.deletedAt) {
+    if (!user || user.status !== USER_STATUS.ACTIVE || user.deletedAt || user.userType !== audience) {
       throw AppError.unauthorized('User account is not active');
     }
 
-    const roles = user.userRoles.map((ur) => ur.role.code);
-    const permissions = [
-      ...new Set(
-        user.userRoles.flatMap((ur) =>
-          ur.role.rolePermissions.map((rp) => rp.permission.code)
-        )
-      ),
-    ];
-
-    req.user = {
-      id: user.id,
-      email: user.email,
-      phone: user.phone,
-      status: user.status,
-      roles,
-      permissions,
-      companyId: decoded.companyId || null,
-      providerId: decoded.providerId || null,
-      branchId: decoded.branchId || null,
-    };
+    req.user = audience === USER_TYPE.DASHBOARD
+      ? buildDashboardUser(user)
+      : buildAppUser(user);
 
     next();
   } catch (err) {
@@ -69,15 +77,57 @@ async function authenticate(req, _res, next) {
   }
 }
 
-/**
- * Optional authentication — attaches user if token present, otherwise continues.
- */
+function verifyBearerToken(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw AppError.unauthorized('Access token is required');
+  }
+
+  return jwt.verify(authHeader.split(' ')[1], config.jwt.accessSecret);
+}
+
+function buildAppUser(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    phone: user.phone,
+    status: user.status,
+    userType: user.userType,
+    role: user.appRole,
+    providerProfile: user.providerProfile || null,
+  };
+}
+
+function buildDashboardUser(user) {
+  const role = user.dashboardProfile?.role || null;
+  const permissions = role
+    ? [...new Set(role.rolePermissions.map((rp) => rp.permission.code))]
+    : [];
+
+  return {
+    id: user.id,
+    email: user.email,
+    phone: user.phone,
+    status: user.status,
+    userType: user.userType,
+    roleId: user.dashboardProfile?.roleId || null,
+    role: role?.code || null,
+    myAdmin: Boolean(user.dashboardProfile?.myAdmin),
+    permissions,
+  };
+}
+
 async function optionalAuth(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next();
   }
-  return authenticate(req, res, next);
+  return authenticateApp(req, res, next);
 }
 
-module.exports = { authenticate, optionalAuth };
+module.exports = {
+  authenticate,
+  authenticateApp,
+  authenticateDashboard,
+  optionalAuth,
+};

@@ -1,13 +1,13 @@
 const { Router } = require('express');
 const Joi = require('joi');
 const companiesController = require('./companies.controller');
-const { authenticate } = require('../../middlewares/auth');
+const { authenticateDashboard } = require('../../middlewares/auth');
 const { authorizePermissions, resolveTenantScope } = require('../../middlewares/authorize');
 const { validate } = require('../../middlewares/validate');
 const { PERMISSIONS } = require('../../constants/permissions');
 
 const router = Router();
-const tenant = [authenticate, resolveTenantScope];
+const tenant = [authenticateDashboard, resolveTenantScope];
 
 const companySchema = { body: Joi.object({ name: Joi.string().required(), nameAr: Joi.string().allow('', null), contactEmail: Joi.string().email().required(), contactPhone: Joi.string().required(), address: Joi.string().allow('', null), taxNumber: Joi.string().allow('', null), industry: Joi.string().allow('', null) }) };
 const branchSchema = { body: Joi.object({ companyId: Joi.string().uuid().required(), name: Joi.string().required(), nameAr: Joi.string().allow('', null), address: Joi.string().allow('', null), phone: Joi.string().allow('', null), city: Joi.string().allow('', null) }) };
@@ -22,29 +22,24 @@ router.post('/companies', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_
 router.get('/companies/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ, PERMISSIONS.COMPANIES_READ_OWN), companiesController.getCompany);
 router.patch('/companies/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_UPDATE, PERMISSIONS.COMPANIES_UPDATE_OWN), companiesController.updateCompany);
 router.delete('/companies/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_DELETE), companiesController.deleteCompany);
-
 router.get('/company-branches', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ_OWN, PERMISSIONS.COMPANIES_READ), companiesController.listBranches);
 router.post('/company-branches', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_BRANCHES), validate(branchSchema), companiesController.createBranch);
 router.get('/company-branches/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ_OWN), companiesController.getBranch);
 router.patch('/company-branches/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_BRANCHES), companiesController.updateBranch);
 router.delete('/company-branches/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_BRANCHES), companiesController.deleteBranch);
-
 router.get('/company-users', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_USERS, PERMISSIONS.USERS_READ), companiesController.listCompanyUsers);
 router.post('/company-users', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_USERS), validate(companyUserSchema), companiesController.createCompanyUser);
 router.get('/company-users/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_USERS), companiesController.getCompanyUser);
 router.patch('/company-users/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_USERS), companiesController.updateCompanyUser);
 router.delete('/company-users/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_MANAGE_USERS), companiesController.deleteCompanyUser);
-
 router.get('/company-billing-profiles', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ_OWN, PERMISSIONS.INVOICES_READ_COMPANY), companiesController.listBillingProfiles);
 router.post('/company-billing-profiles', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_UPDATE_OWN, PERMISSIONS.COMPANIES_UPDATE), validate(billingProfileSchema), companiesController.createBillingProfile);
 router.get('/company-billing-profiles/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_READ_OWN, PERMISSIONS.INVOICES_READ_COMPANY), companiesController.getBillingProfile);
 router.patch('/company-billing-profiles/:id', ...tenant, authorizePermissions(PERMISSIONS.COMPANIES_UPDATE_OWN), companiesController.updateBillingProfile);
-
 router.get('/approval-rules', ...tenant, authorizePermissions(PERMISSIONS.APPROVALS_READ), companiesController.listApprovalRules);
 router.post('/approval-rules', ...tenant, authorizePermissions(PERMISSIONS.APPROVALS_APPROVE, PERMISSIONS.SETTINGS_MANAGE_COMPANY), validate(approvalRuleSchema), companiesController.createApprovalRule);
 router.patch('/approval-rules/:id', ...tenant, authorizePermissions(PERMISSIONS.SETTINGS_MANAGE_COMPANY), companiesController.updateApprovalRule);
 router.delete('/approval-rules/:id', ...tenant, authorizePermissions(PERMISSIONS.SETTINGS_MANAGE_COMPANY), companiesController.deleteApprovalRule);
-
 router.get('/approvals', ...tenant, authorizePermissions(PERMISSIONS.APPROVALS_READ), companiesController.listApprovals);
 router.get('/approvals/:id', ...tenant, authorizePermissions(PERMISSIONS.APPROVALS_READ), companiesController.getApproval);
 router.post('/approvals/:id/approve', ...tenant, authorizePermissions(PERMISSIONS.APPROVALS_APPROVE), validate(approveSchema), companiesController.approveOrder);

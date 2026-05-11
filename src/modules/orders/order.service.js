@@ -1,91 +1,71 @@
-const { prisma } = require('../../lib/prisma');
 const { parseListQuery } = require('../../lib/listQuery');
 const { AppError } = require('../../utils/AppError');
 const { mergeWhere, companyTenantWhere, requesterSelfWhere } = require('../../utils/tenantQuery');
 const { assertCanViewOrder, loadOrderForAccess } = require('./order.access');
 const { writeAudit } = require('../../services/audit.service');
-const { notifyUser } = require('../../services/notification.service');
 const { getIo, emitOrder, emitProvider, emitCompany, EVENTS } = require('../../lib/socketEmitter');
+const ordersRepository = require('./orders.repository');
 
 function orderNumber() {
   return `GT-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
 
-async function appendHistory(tx, orderId, fromStatus, toStatus, userId, notes) {
-  await tx.orderStatusHistory.create({
-    data: { orderId, fromStatus, toStatus, changedBy: userId, notes },
-  });
-}
-
 async function needsCompanyApproval(order) {
   if (order.sourceType !== 'company' || !order.companyId) return false;
-  const rules = await prisma.approvalRule.findMany({
-    where: { companyId: order.companyId, isActive: true },
-  });
+
+  const rules = await ordersRepository.findApprovalRules(order.companyId);
   if (rules.length === 0) return false;
-  const st = await prisma.serviceType.findUnique({ where: { id: order.serviceTypeId } });
-  const code = st?.code || null;
+
+  const serviceType = await ordersRepository.findServiceType(order.serviceTypeId);
+  const code = serviceType?.code || null;
   const price = Number(order.estimatedPrice ?? order.finalPrice ?? 0);
-  for (const r of rules) {
-    let match = true;
-    if (r.serviceTypeCode && r.serviceTypeCode !== code) match = false;
-    if (r.minAmount != null && price < Number(r.minAmount)) match = false;
-    if (r.maxAmount != null && price > Number(r.maxAmount)) match = false;
-    if (match) return true;
-  }
-  return false;
+
+  return rules.some((rule) => {
+    if (rule.serviceTypeCode && rule.serviceTypeCode !== code) return false;
+    if (rule.minAmount != null && price < Number(rule.minAmount)) return false;
+    if (rule.maxAmount != null && price > Number(rule.maxAmount)) return false;
+    return true;
+  });
 }
 
 async function listOrders(query, user, tenantScope) {
   const lq = parseListQuery(query, { searchFields: ['orderNumber'] });
   let base = { deletedAt: null };
+
   if (tenantScope.type === 'global') {
     base = mergeWhere(base, {});
   } else if (tenantScope.type === 'company') {
-    const f = companyTenantWhere(tenantScope);
-    base = mergeWhere(base, f || { id: '___none___' });
+    const filter = companyTenantWhere(tenantScope);
+    base = mergeWhere(base, filter || { id: '___none___' });
   } else if (tenantScope.type === 'self') {
-    const f = requesterSelfWhere(tenantScope);
-    base = mergeWhere(base, f || { id: '___none___' });
+    const filter = requesterSelfWhere(tenantScope);
+    base = mergeWhere(base, filter || { id: '___none___' });
   } else if (tenantScope.type === 'provider' && tenantScope.providerId) {
-    const pid = tenantScope.providerId;
-    const related = await prisma.order.findMany({
-      where: {
-        deletedAt: null,
-        OR: [
-          { offers: { some: { providerId: pid } } },
-          { assignments: { some: { providerId: pid } } },
-        ],
-      },
-      select: { id: true },
-    });
-    const ids = related.map((r) => r.id);
+    const related = await ordersRepository.findProviderRelatedOrderIds(tenantScope.providerId);
+    const ids = related.map((row) => row.id);
     base = mergeWhere(base, ids.length ? { id: { in: ids } } : { id: '___none___' });
   } else if (tenantScope.type === 'assignment') {
-    const drivers = await prisma.providerDriver.findMany({
-      where: { userId: user.id, isActive: true },
-      select: { id: true },
-    });
-    const dIds = drivers.map((d) => d.id);
+    const drivers = await ordersRepository.findActiveDriverIdsByUser(user.id);
+    const driverIds = drivers.map((driver) => driver.id);
     base = mergeWhere(
       base,
-      dIds.length
-        ? { assignments: { some: { driverId: { in: dIds } } } }
+      driverIds.length
+        ? { assignments: { some: { driverId: { in: driverIds } } } }
         : { id: '___none___' }
     );
   }
 
-  const w = mergeWhere(base, lq.where);
+  const where = mergeWhere(base, lq.where);
   const [total, rows] = await Promise.all([
-    prisma.order.count({ where: w }),
-    prisma.order.findMany({
-      where: w,
+    ordersRepository.countOrders(where),
+    ordersRepository.findOrders({
+      where,
       orderBy: lq.orderBy,
       skip: lq.skip,
       take: lq.take,
-      include: { serviceType: true, company: true, requester: { include: { profile: true } } },
     }),
   ]);
+
   return { rows, total, page: lq.page, limit: lq.limit };
 }
 
@@ -111,70 +91,30 @@ async function createOrder(body, user, tenantScope, req) {
     src = 'company';
   }
 
-  const order = await prisma.$transaction(async (tx) => {
-    const o = await tx.order.create({
-      data: {
-        orderNumber: orderNumber(),
-        sourceType: src,
-        requesterId: user.id,
-        companyId,
-        serviceTypeId,
-        vehicleTypeId: vehicleTypeId || null,
-        workerCount: workerCount ?? 1,
-        isFragile: !!isFragile,
-        notes,
-        scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
-        scheduledTimeSlot,
-        estimatedPrice,
-        status: 'draft',
-        createdBy: user.id,
-      },
-    });
-    if (locations?.length) {
-      for (const loc of locations) {
-        await tx.orderLocation.create({
-          data: {
-            orderId: o.id,
-            type: loc.type,
-            addressLine: loc.addressLine,
-            city: loc.city,
-            area: loc.area || null,
-            latitude: loc.latitude,
-            longitude: loc.longitude,
-            floor: loc.floor,
-            unit: loc.unit,
-            hasElevator: !!loc.hasElevator,
-            contactName: loc.contactName,
-            contactPhone: loc.contactPhone,
-            notes: loc.notes,
-          },
-        });
-      }
-    }
-    if (items?.length) {
-      for (const it of items) {
-        await tx.orderItem.create({
-          data: {
-            orderId: o.id,
-            name: it.name,
-            quantity: it.quantity ?? 1,
-            description: it.description,
-            isFragile: !!it.isFragile,
-            weight: it.weight,
-            dimensions: it.dimensions,
-          },
-        });
-      }
-    }
-    await appendHistory(tx, o.id, null, 'draft', user.id, 'Created');
-    return o;
-  });
+  const order = await ordersRepository.createOrderWithDetails(
+    {
+      orderNumber: orderNumber(),
+      sourceType: src,
+      requesterId: user.id,
+      companyId,
+      serviceTypeId,
+      vehicleTypeId: vehicleTypeId || null,
+      workerCount: workerCount ?? 1,
+      isFragile: !!isFragile,
+      notes,
+      scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
+      scheduledTimeSlot,
+      estimatedPrice,
+      status: 'draft',
+      createdBy: user.id,
+    },
+    locations,
+    items,
+    user.id
+  );
 
   await writeAudit(req, 'order.create', 'Order', order.id, null, { id: order.id });
-  return prisma.order.findUnique({
-    where: { id: order.id },
-    include: { locations: true, items: true, serviceType: true },
-  });
+  return ordersRepository.findOrderWithDetails(order.id);
 }
 
 async function updateOrder(orderId, body, user, tenantScope, req) {
@@ -185,19 +125,15 @@ async function updateOrder(orderId, body, user, tenantScope, req) {
   if (tenantScope.type === 'self' && order.requesterId !== user.id) throw AppError.forbidden();
   if (tenantScope.type === 'company' && order.companyId !== tenantScope.companyId) throw AppError.forbidden();
 
-  const updated = await prisma.order.update({
-    where: { id: orderId },
-    data: {
-      vehicleTypeId: body.vehicleTypeId,
-      workerCount: body.workerCount,
-      isFragile: body.isFragile,
-      notes: body.notes,
-      scheduledDate: body.scheduledDate ? new Date(body.scheduledDate) : undefined,
-      scheduledTimeSlot: body.scheduledTimeSlot,
-      estimatedPrice: body.estimatedPrice,
-      updatedBy: user.id,
-    },
-    include: { locations: true, items: true, serviceType: true },
+  const updated = await ordersRepository.updateOrder(orderId, {
+    vehicleTypeId: body.vehicleTypeId,
+    workerCount: body.workerCount,
+    isFragile: body.isFragile,
+    notes: body.notes,
+    scheduledDate: body.scheduledDate ? new Date(body.scheduledDate) : undefined,
+    scheduledTimeSlot: body.scheduledTimeSlot,
+    estimatedPrice: body.estimatedPrice,
+    updatedBy: user.id,
   });
   await writeAudit(req, 'order.update', 'Order', orderId, order, updated);
   return updated;
@@ -206,10 +142,7 @@ async function updateOrder(orderId, body, user, tenantScope, req) {
 async function softDeleteOrder(orderId, user, tenantScope, req) {
   const order = await assertCanViewOrder(user, tenantScope, orderId);
   if (order.status !== 'draft') throw AppError.unprocessable('Only draft orders can be deleted');
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { deletedAt: new Date(), updatedBy: user.id },
-  });
+  await ordersRepository.markOrderDeleted(orderId, { deletedAt: new Date(), updatedBy: user.id });
   await writeAudit(req, 'order.delete', 'Order', orderId, null, null);
   return { id: orderId };
 }
@@ -217,60 +150,28 @@ async function softDeleteOrder(orderId, user, tenantScope, req) {
 async function submitOrder(orderId, user, tenantScope, req) {
   const order = await assertCanViewOrder(user, tenantScope, orderId);
   if (order.status !== 'draft') throw AppError.unprocessable('Invalid status for submit');
-  const locs = await prisma.orderLocation.findMany({ where: { orderId } });
-  const hasPickup = locs.some((l) => l.type === 'pickup');
-  const hasDrop = locs.some((l) => l.type === 'dropoff');
-  if (!hasPickup || !hasDrop) throw AppError.badRequest('Pickup and dropoff locations required');
 
-  const full = { ...order, companyId: order.companyId, serviceTypeId: order.serviceTypeId };
-  const approval = await needsCompanyApproval(full);
+  const locations = await ordersRepository.findOrderLocations(orderId);
+  const hasPickup = locations.some((location) => location.type === 'pickup');
+  const hasDropoff = locations.some((location) => location.type === 'dropoff');
+  if (!hasPickup || !hasDropoff) throw AppError.badRequest('Pickup and dropoff locations required');
 
-  await prisma.$transaction(async (tx) => {
-    if (approval) {
-      await tx.order.update({
-        where: { id: orderId },
-        data: { status: 'pending_approval', updatedBy: user.id },
-      });
-      await appendHistory(tx, orderId, 'draft', 'submitted', user.id, 'Submitted');
-      await appendHistory(tx, orderId, 'submitted', 'pending_approval', user.id, 'Awaiting approval');
-    } else if (order.sourceType === 'company') {
-      await tx.order.update({
-        where: { id: orderId },
-        data: { status: 'published_for_offers', updatedBy: user.id },
-      });
-      await appendHistory(tx, orderId, 'draft', 'submitted', user.id, 'Submitted');
-      await appendHistory(tx, orderId, 'submitted', 'published_for_offers', user.id, 'Auto-published');
-    } else {
-      await tx.order.update({
-        where: { id: orderId },
-        data: { status: 'published_for_offers', updatedBy: user.id },
-      });
-      await appendHistory(tx, orderId, 'draft', 'submitted', user.id, 'Submitted');
-      await appendHistory(tx, orderId, 'submitted', 'published_for_offers', user.id, 'Published');
-    }
-  });
+  const approval = await needsCompanyApproval(order);
+  await ordersRepository.submitOrder(orderId, order, approval, user.id);
 
   const io = getIo(req.app);
   emitOrder(io, orderId, EVENTS.ORDER_STATUS, { orderId, status: 'published_for_offers' });
   if (order.companyId) emitCompany(io, order.companyId, EVENTS.ORDER_STATUS, { orderId });
 
-  return prisma.order.findUnique({
-    where: { id: orderId },
-    include: { locations: true, items: true, statusHistory: { orderBy: { createdAt: 'desc' }, take: 20 } },
-  });
+  return ordersRepository.findOrderAfterSubmit(orderId);
 }
 
 async function publishOrder(orderId, user, tenantScope, req) {
   const order = await assertCanViewOrder(user, tenantScope, orderId);
   const allowed = ['submitted', 'approved'];
   if (!allowed.includes(order.status)) throw AppError.unprocessable('Cannot publish from this status');
-  await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: orderId },
-      data: { status: 'published_for_offers', updatedBy: user.id },
-    });
-    await appendHistory(tx, orderId, order.status, 'published_for_offers', user.id, 'Published');
-  });
+
+  await ordersRepository.publishOrder(orderId, order.status, user.id);
   const io = getIo(req.app);
   emitOrder(io, orderId, EVENTS.ORDER_STATUS, { orderId });
   return loadOrderForAccess(orderId);
@@ -280,23 +181,10 @@ async function cancelOrder(orderId, body, user, tenantScope, req) {
   const order = await assertCanViewOrder(user, tenantScope, orderId);
   const terminal = ['completed', 'canceled', 'rejected'];
   if (terminal.includes(order.status)) throw AppError.unprocessable('Cannot cancel');
+
   const reason = body.reason || 'Canceled';
-  await prisma.$transaction(async (tx) => {
-    await tx.cancellation.upsert({
-      where: { orderId },
-      create: { orderId, reason, canceledBy: user.id },
-      update: { reason, canceledBy: user.id },
-    });
-    await tx.order.update({
-      where: { id: orderId },
-      data: { status: 'canceled', cancelReason: reason, updatedBy: user.id },
-    });
-    await appendHistory(tx, orderId, order.status, 'canceled', user.id, reason);
-    await tx.offer.updateMany({
-      where: { orderId, status: 'pending' },
-      data: { status: 'expired', respondedAt: new Date(), respondedBy: user.id },
-    });
-  });
+  await ordersRepository.cancelOrder(orderId, order.status, reason, user.id);
+
   const io = getIo(req.app);
   emitOrder(io, orderId, EVENTS.ORDER_STATUS, { orderId, status: 'canceled' });
   return loadOrderForAccess(orderId);
@@ -307,29 +195,12 @@ async function assignOrder(orderId, body, user, tenantScope, req) {
   if (!['offer_accepted', 'published_for_offers', 'offer_received'].includes(order.status)) {
     throw AppError.unprocessable('Order not ready for assignment');
   }
-  const { providerId, driverId } = body;
-  if (!providerId) throw AppError.badRequest('providerId required');
-  const assignment = await prisma.$transaction(async (tx) => {
-    const a = await tx.assignment.create({
-      data: {
-        orderId,
-        providerId,
-        driverId: driverId || null,
-        status: driverId ? 'accepted' : 'pending',
-        assignedBy: user.id,
-        acceptedAt: driverId ? new Date() : null,
-      },
-    });
-    await tx.order.update({
-      where: { id: orderId },
-      data: { status: 'assigned', updatedBy: user.id },
-    });
-    await appendHistory(tx, orderId, order.status, 'assigned', user.id, 'Assigned');
-    return a;
-  });
+  if (!body.providerId) throw AppError.badRequest('providerId required');
+
+  const assignment = await ordersRepository.assignOrder(orderId, order.status, body, user.id);
   const io = getIo(req.app);
   emitOrder(io, orderId, EVENTS.ORDER_ASSIGNED, { orderId, assignmentId: assignment.id });
-  emitProvider(io, providerId, EVENTS.ORDER_ASSIGNED, { orderId });
+  emitProvider(io, body.providerId, EVENTS.ORDER_ASSIGNED, { orderId });
   return assignment;
 }
 
@@ -348,16 +219,26 @@ async function transitionSimple(orderId, nextStatus, user, tenantScope, req, not
   if (expected !== nextStatus) {
     throw AppError.unprocessable(`Invalid transition to ${nextStatus} from ${order.status}`);
   }
-  await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: orderId },
-      data: { status: nextStatus, updatedBy: user.id, completedAt: nextStatus === 'completed' ? new Date() : undefined },
-    });
-    await appendHistory(tx, orderId, order.status, nextStatus, user.id, notes);
-  });
+
+  await ordersRepository.transitionOrder(orderId, order.status, nextStatus, user.id, notes);
   const io = getIo(req.app);
   emitOrder(io, orderId, EVENTS.ORDER_STATUS, { orderId, status: nextStatus });
   return loadOrderForAccess(orderId);
+}
+
+async function getOrderTimeline(orderId, user, tenantScope) {
+  await assertCanViewOrder(user, tenantScope, orderId);
+  return ordersRepository.findStatusHistory(orderId);
+}
+
+async function listOrderAttachments(orderId, user, tenantScope) {
+  await assertCanViewOrder(user, tenantScope, orderId);
+  return ordersRepository.findAttachments(orderId);
+}
+
+async function createOrderAttachment(orderId, body, user, tenantScope) {
+  await assertCanViewOrder(user, tenantScope, orderId);
+  return ordersRepository.createAttachment(orderId, body, user.id);
 }
 
 module.exports = {
@@ -370,6 +251,9 @@ module.exports = {
   cancelOrder,
   assignOrder,
   transitionSimple,
+  getOrderTimeline,
+  listOrderAttachments,
+  createOrderAttachment,
   assertCanViewOrder,
   loadOrderForAccess,
 };

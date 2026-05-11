@@ -1,20 +1,15 @@
-const { prisma } = require('../../lib/prisma');
 const { AppError } = require('../../utils/AppError');
 const { PERMISSIONS } = require('../../constants/permissions');
+const supportRepository = require('./support.repository');
+
 async function loadTicketForAccess(ticketId) {
-  const tkt = await prisma.ticket.findUnique({
-    where: { id: ticketId },
-    include: { issueType: true },
-  });
+  const tkt = await supportRepository.findTicketForAccess(ticketId);
   if (!tkt) return null;
 
   // Ticket has `orderId` but no Prisma relation to Order in the current schema.
   // Load minimal order context separately when present (used for company-scope access checks).
   if (tkt.orderId) {
-    const order = await prisma.order.findUnique({
-      where: { id: tkt.orderId },
-      select: { id: true, companyId: true, requesterId: true },
-    });
+    const order = await supportRepository.findOrderAccessContext(tkt.orderId);
     return { ...tkt, order };
   }
 
@@ -35,9 +30,7 @@ async function assertCanViewTicket(req, ticketId) {
 
   if (perms.includes(PERMISSIONS.TICKETS_READ_COMPANY) && req.tenantScope?.type === 'company') {
     const companyId = req.tenantScope.companyId;
-    const submitterInCompany = await prisma.companyUser.findFirst({
-      where: { userId: tkt.userId, companyId },
-    });
+    const submitterInCompany = await supportRepository.findCompanyUser(tkt.userId, companyId);
     const orderMatchesCompany = tkt.order?.companyId === companyId;
     if (submitterInCompany || orderMatchesCompany) return tkt;
   }

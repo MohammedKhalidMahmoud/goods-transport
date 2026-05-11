@@ -9,7 +9,17 @@ class AuthController {
   login = async (req, res, next) => {
     try {
       const { identifier, password } = req.body;
-      const result = await this.service.login(identifier, password);
+      const result = await this.service.login(identifier, password, this._sessionContext(req));
+      return success(res, result, 'Login successful');
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  dashboardLogin = async (req, res, next) => {
+    try {
+      const { identifier, password } = req.body;
+      const result = await this.service.dashboardLogin(identifier, password, this._sessionContext(req));
       return success(res, result, 'Login successful');
     } catch (err) {
       next(err);
@@ -19,7 +29,17 @@ class AuthController {
   refresh = async (req, res, next) => {
     try {
       const { refreshToken } = req.body;
-      const result = await this.service.refresh(refreshToken);
+      const result = await this.service.refresh(refreshToken, this._sessionContext(req));
+      return success(res, result, 'Token refreshed successfully');
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  dashboardRefresh = async (req, res, next) => {
+    try {
+      const { refreshToken } = req.body;
+      const result = await this.service.dashboardRefresh(refreshToken, this._sessionContext(req));
       return success(res, result, 'Token refreshed successfully');
     } catch (err) {
       next(err);
@@ -39,6 +59,15 @@ class AuthController {
   me = async (req, res, next) => {
     try {
       const user = await this.service.getCurrentUser(req.user.id);
+      return success(res, user, 'Current user retrieved');
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  dashboardMe = async (req, res, next) => {
+    try {
+      const user = await this.service.getCurrentDashboardUser(req.user.id);
       return success(res, user, 'Current user retrieved');
     } catch (err) {
       next(err);
@@ -80,6 +109,13 @@ class AuthController {
       next(err);
     }
   };
+
+  _sessionContext(req) {
+    return {
+      ipAddress: req.ip || null,
+      userAgent: req.get('user-agent') || null,
+    };
+  }
 }
 
 module.exports = { AuthController };

@@ -5,7 +5,18 @@ const { INTERNAL_ROLES, COMPANY_ROLES, PROVIDER_ROLES } = require('../constants/
  * Internal roles always get global scope regardless of stale JWT claims.
  */
 function buildTenantScopeFromUser(user) {
-  const { id: userId, roles, companyId, providerId, branchId } = user;
+  const { id: userId, companyId, providerId, branchId } = user;
+  const roles = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
+
+  if (user.userType === 'DASHBOARD') {
+    return {
+      type: 'global',
+      id: null,
+      branchId: null,
+      companyId: null,
+      providerId: null,
+    };
+  }
 
   if (roles.some((r) => INTERNAL_ROLES.includes(r))) {
     return {
@@ -37,7 +48,7 @@ function buildTenantScopeFromUser(user) {
     };
   }
 
-  if (roles.includes('individual_customer')) {
+  if (roles.includes('individual_customer') || roles.includes('CUSTOMER')) {
     return {
       type: 'self',
       id: userId,
@@ -47,7 +58,7 @@ function buildTenantScopeFromUser(user) {
     };
   }
 
-  if (roles.includes('delivery_driver')) {
+  if (roles.includes('delivery_driver') || roles.includes('PROVIDER')) {
     return {
       type: 'assignment',
       id: userId,
@@ -67,8 +78,9 @@ function buildTenantScopeFromUser(user) {
 }
 
 function assertTenantClaimsMatchRoles(user) {
-  const needsCompany = user.roles.some((r) => COMPANY_ROLES.includes(r));
-  const needsProvider = user.roles.some((r) => PROVIDER_ROLES.includes(r));
+  const roles = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
+  const needsCompany = roles.some((r) => COMPANY_ROLES.includes(r));
+  const needsProvider = roles.some((r) => PROVIDER_ROLES.includes(r));
 
   if (needsCompany && !user.companyId) {
     return 'Company context is missing; re-login or contact support.';
