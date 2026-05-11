@@ -773,6 +773,83 @@ Documentation rules:
 - document standardized error envelopes
 - keep auth requirements in the docs for protected endpoints
 
+### 8.1 Swagger source files
+
+Swagger documentation must be maintained as module-scoped YAML fragments under `src/swagger/<module>/`.
+
+The current `src/docs/*.swagger.js` annotation files are legacy documentation and should be migrated to YAML fragments. Do not add new Swagger documentation under `src/docs/`.
+
+A module folder may contain either or both files:
+
+```text
+src/swagger/
+  auth/
+    paths.yaml
+    schemas.yaml
+  orders/
+    paths.yaml
+    schemas.yaml
+```
+
+Adding a new module documentation folder should not require manual registration in the Swagger config. The Swagger config should discover supported documentation files recursively and assemble the OpenAPI document at module load time.
+
+### 8.2 Dynamic Swagger assembly
+
+The Swagger config should build one OpenAPI document from a base spec plus discovered module fragments.
+
+Base document requirements:
+
+- `openapi: '3.0.0'`
+- `info.title` and `info.version` from `configs/env.ts`
+- `servers` with `/api/v1` as the API base URL
+- `components.securitySchemes.bearerAuth` using HTTP bearer JWT
+- empty `paths: {}` and `components.schemas: {}` merge targets
+
+Assembly requirements:
+
+- discover `paths.yaml` and `schemas.yaml` recursively under `src/swagger/**`
+- only include files inside subfolders, not root-level Swagger files
+- parse YAML with `js-yaml`
+- merge parsed fragments with `deepmerge`
+- throw a descriptive error that includes the filename when YAML parsing fails
+- export the assembled spec as the default export so route registration can mount it directly with `swagger-ui-express`
+- run synchronously at module load time, not lazily
+- log the discovered Swagger module folders once at startup using the shared logger
+
+### 8.3 OpenAPI route conventions
+
+The documented public API base path is `/api/v1`.
+
+App routes are documented without an additional app prefix:
+
+```text
+/api/v1/auth/login
+/api/v1/auth/me
+/api/v1/orders
+```
+
+Dashboard routes are documented under the `/dashboard` prefix:
+
+```text
+/api/v1/dashboard/auth/login
+/api/v1/dashboard/orders
+```
+
+When an endpoint exists for both app and dashboard users, document both paths explicitly. Do not rely on a shared undocumented route to imply both applications support the same behavior.
+
+### 8.4 Schema conventions
+
+Swagger schemas should describe the externally visible API contract, not internal Prisma models.
+
+Rules:
+
+- response examples must use the standardized response envelope
+- request schemas must match the validation schemas or DTOs used by the route layer
+- protected endpoints must declare bearer authentication
+- app-user endpoints should document app roles only when role-specific behavior is exposed
+- dashboard endpoints should document permission requirements when relevant
+- avoid documenting deprecated permissions or multi-role app-user behavior for the app API
+
 ---
 
 ## 9. Coding Standards
