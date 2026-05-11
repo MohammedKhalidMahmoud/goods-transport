@@ -38,6 +38,88 @@ const swaggerDefinition = {
       IdPath: { in: 'path', name: 'id', required: true, schema: { type: 'string', format: 'uuid' } },
       OrderIdPath: { in: 'path', name: 'orderId', required: true, schema: { type: 'string', format: 'uuid' } },
     },
+    responses: {
+      Success: {
+        description: 'Operation successful',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/SuccessResponse' },
+          },
+        },
+      },
+      Created: {
+        description: 'Resource created successfully',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/SuccessResponse' },
+          },
+        },
+      },
+      Paginated: {
+        description: 'Paginated records retrieved successfully',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/PaginatedResponse' },
+          },
+        },
+      },
+      BadRequest: {
+        description: 'Bad request or validation error',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+          },
+        },
+      },
+      Unauthorized: {
+        description: 'Authentication is required or token is invalid',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+          },
+        },
+      },
+      Forbidden: {
+        description: 'Authenticated user does not have access to this resource',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+          },
+        },
+      },
+      NotFound: {
+        description: 'Resource was not found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+          },
+        },
+      },
+      Conflict: {
+        description: 'Resource conflict',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+          },
+        },
+      },
+      Unprocessable: {
+        description: 'Request cannot be processed in the current resource state',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+          },
+        },
+      },
+      InternalError: {
+        description: 'Internal server error',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+          },
+        },
+      },
+    },
     schemas: {
       SuccessResponse: {
         type: 'object',
@@ -190,7 +272,7 @@ const swaggerDefinition = {
 
 const options = {
   swaggerDefinition,
-  apis: ['./src/docs/**/*.swagger.js', './src/modules/**/*.swagger.js'],
+  apis: ['./src/docs/**/*.swagger.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

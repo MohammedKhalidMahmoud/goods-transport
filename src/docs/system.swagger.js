@@ -1,0 +1,16 @@
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     tags: [System]
+ *     summary: API health check
+ *     responses:
+ *       200:
+ *         description: API is running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ */
+
+module.exports = {};
