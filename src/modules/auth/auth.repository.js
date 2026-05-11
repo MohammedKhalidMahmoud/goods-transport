@@ -151,6 +151,11 @@ class AuthRepository {
         },
       },
       providerProfile: true,
+      providerUsers: {
+        where: { isActive: true },
+        select: { providerId: true },
+        take: 1,
+      },
     };
   }
 }

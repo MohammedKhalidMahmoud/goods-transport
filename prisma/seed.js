@@ -157,22 +157,90 @@ async function main() {
     create: { userId: providerUser.id, businessName: 'Provider Demo', logoUrl: null },
   });
 
-  const service = await prisma.service.upsert({
+  await prisma.service.updateMany({
     where: { code: 'home_moving' },
-    update: { name: 'Home Moving', isActive: true },
-    create: { code: 'home_moving', name: 'Home Moving', isActive: true },
+    data: { isActive: false },
   });
+
+  await prisma.pricingSetting.updateMany({
+    where: { serviceCode: 'home_moving' },
+    data: { isActive: false },
+  });
+
+  const serviceDefinitions = [
+    {
+      key: 'furnitureMoving',
+      code: 'furniture_moving',
+      name: 'Furniture Moving',
+      description: 'Moving furniture between homes, offices, or storage locations.',
+      sortOrder: 1,
+      pricing: { baseFare: 120, perKmRate: 6, perWorkerRate: 45, floorRate: 20 },
+    },
+    {
+      key: 'itemTransport',
+      code: 'item_transport',
+      name: 'Item Transport',
+      description: 'Single item or small load transport inside supported cities.',
+      sortOrder: 2,
+      pricing: { baseFare: 60, perKmRate: 4, perWorkerRate: 25, floorRate: 10 },
+    },
+    {
+      key: 'towTruck',
+      code: 'tow_truck',
+      name: 'Tow Truck',
+      description: 'Vehicle towing and roadside transport service.',
+      sortOrder: 3,
+      pricing: { baseFare: 150, perKmRate: 8, perWorkerRate: 0, floorRate: 0 },
+    },
+    {
+      key: 'shippingToEgypt',
+      code: 'shipping_to_egypt',
+      name: 'Shipping To Egypt',
+      description: 'International shipping service for eligible goods to Egypt.',
+      sortOrder: 4,
+      pricing: { baseFare: 300, perKmRate: 0, perWorkerRate: 0, floorRate: 0 },
+    },
+  ];
+
+  const services = {};
+  for (const definition of serviceDefinitions) {
+    services[definition.key] = await prisma.service.upsert({
+      where: { code: definition.code },
+      update: {
+        name: definition.name,
+        description: definition.description,
+        sortOrder: definition.sortOrder,
+        isActive: true,
+      },
+      create: {
+        code: definition.code,
+        name: definition.name,
+        description: definition.description,
+        sortOrder: definition.sortOrder,
+        isActive: true,
+      },
+    });
+
+    await prisma.pricingSetting.upsert({
+      where: { serviceCode: definition.code },
+      update: {
+        ...definition.pricing,
+        currency: 'SAR',
+        isActive: true,
+      },
+      create: {
+        serviceCode: definition.code,
+        ...definition.pricing,
+        currency: 'SAR',
+        isActive: true,
+      },
+    });
+  }
 
   await prisma.city.upsert({
     where: { code: 'riyadh' },
     update: { name: 'Riyadh', nameAr: 'الرياض', isActive: true },
     create: { code: 'riyadh', name: 'Riyadh', nameAr: 'الرياض', isActive: true },
-  });
-
-  await prisma.pricingSetting.upsert({
-    where: { serviceCode: service.code },
-    update: { baseFare: 100, perKmRate: 5, perWorkerRate: 40, currency: 'SAR', isActive: true },
-    create: { serviceCode: service.code, baseFare: 100, perKmRate: 5, perWorkerRate: 40, currency: 'SAR', isActive: true },
   });
 
   const appSettings = [
@@ -210,6 +278,22 @@ async function main() {
     },
   });
 
+  await prisma.providerUser.upsert({
+    where: {
+      providerId_userId: {
+        providerId: provider.id,
+        userId: providerUser.id,
+      },
+    },
+    update: { role: 'provider_operator', isActive: true },
+    create: {
+      providerId: provider.id,
+      userId: providerUser.id,
+      role: 'provider_operator',
+      isActive: true,
+    },
+  });
+
   await prisma.providerWallet.upsert({
     where: { providerId: provider.id },
     update: {},
@@ -224,11 +308,11 @@ async function main() {
 
   const order = await prisma.order.upsert({
     where: { orderNumber: 'GT-DEMO-001' },
-    update: { status: 'published_for_offers', requesterId: customer.id, serviceId: service.id },
+    update: { status: 'published_for_offers', requesterId: customer.id, serviceId: services.furnitureMoving.id },
     create: {
       orderNumber: 'GT-DEMO-001',
       requesterId: customer.id,
-      serviceId: service.id,
+      serviceId: services.furnitureMoving.id,
       status: 'published_for_offers',
       workerCount: 1,
       estimatedPrice: 250,

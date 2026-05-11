@@ -4,7 +4,7 @@ const { success, paginated } = require('../../utils/response');
 class OperationsController {
   listOffers = async (req, res, next) => {
     try {
-      const result = await operationsService.listOffers(req.query, req.tenantScope);
+      const result = await operationsService.listOffers(req.query, req.user, req.tenantScope);
       return paginated(res, result.rows, { page: result.page, limit: result.limit, total: result.total }, 'Offers');
     } catch (err) {
       next(err);
@@ -22,7 +22,7 @@ class OperationsController {
 
   getOffer = async (req, res, next) => {
     try {
-      const result = await operationsService.getOffer(req.params.id, req.tenantScope);
+      const result = await operationsService.getOffer(req.params.id, req.user, req.tenantScope);
       return success(res, result);
     } catch (err) {
       next(err);

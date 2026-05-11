@@ -43,16 +43,28 @@
                 format: uuid
               price:
                 type: number
+                minimum: 0.01
+                example: 240
               estimatedDuration:
                 type: string
                 nullable: true
+                example: 2 hours
               notes:
                 type: string
                 nullable: true
+                example: Includes loading and unloading.
               validUntil:
                 type: string
                 format: date-time
                 nullable: true
+                description: Must be a future ISO 8601 date-time.
+                example: '2026-12-31T23:59:59.000Z'
+          example:
+            orderId: 79c99d75-4d8f-400f-bd15-d7b66ece749f
+            price: 240
+            estimatedDuration: 2 hours
+            notes: Includes loading and unloading.
+            validUntil: '2026-12-31T23:59:59.000Z'
 /offers/{id}:
   get:
     tags:
@@ -156,16 +168,28 @@
                 format: uuid
               price:
                 type: number
+                minimum: 0.01
+                example: 240
               estimatedDuration:
                 type: string
                 nullable: true
+                example: 2 hours
               notes:
                 type: string
                 nullable: true
+                example: Includes loading and unloading.
               validUntil:
                 type: string
                 format: date-time
                 nullable: true
+                description: Must be a future ISO 8601 date-time.
+                example: '2026-12-31T23:59:59.000Z'
+          example:
+            orderId: 79c99d75-4d8f-400f-bd15-d7b66ece749f
+            price: 240
+            estimatedDuration: 2 hours
+            notes: Includes loading and unloading.
+            validUntil: '2026-12-31T23:59:59.000Z'
 /dashboard/offers/{id}:
   get:
     tags:
@@ -206,13 +230,22 @@
             properties:
               price:
                 type: number
+                minimum: 0.01
+                example: 240
               notes:
                 type: string
                 nullable: true
+                example: Updated offer notes.
               validUntil:
                 type: string
                 format: date-time
                 nullable: true
+                description: Must be a future ISO 8601 date-time.
+                example: '2026-12-31T23:59:59.000Z'
+          example:
+            price: 240
+            notes: Updated offer notes.
+            validUntil: '2026-12-31T23:59:59.000Z'
   delete:
     tags:
       - Admin Offers

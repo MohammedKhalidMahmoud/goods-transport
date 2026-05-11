@@ -8,7 +8,15 @@ const { PERMISSIONS } = require('../../constants/permissions');
 
 const router = Router();
 const tenant = [authenticate, resolveTenantScope];
-const offerCreateSchema = { body: Joi.object({ orderId: Joi.string().uuid().required(), price: Joi.number().required(), estimatedDuration: Joi.string().allow('', null), notes: Joi.string().allow('', null), validUntil: Joi.date().iso().allow(null) }) };
+const offerCreateSchema = {
+  body: Joi.object({
+    orderId: Joi.string().uuid().required(),
+    price: Joi.number().positive().required(),
+    estimatedDuration: Joi.string().allow('', null),
+    notes: Joi.string().allow('', null),
+    validUntil: Joi.date().iso().greater('now').allow(null),
+  }),
+};
 
 router.get('/offers', ...tenant, authorizePermissions(PERMISSIONS.OFFERS_READ, PERMISSIONS.OFFERS_READ_OWN), offersController.listOffers);
 router.post('/offers', ...tenant, authorizePermissions(PERMISSIONS.OFFERS_CREATE), validate(offerCreateSchema), offersController.createOffer);

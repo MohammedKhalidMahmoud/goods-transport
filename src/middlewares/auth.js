@@ -56,6 +56,11 @@ async function authenticateAudience(audience, req, next) {
           },
         },
         providerProfile: true,
+        providerUsers: {
+          where: { isActive: true },
+          select: { providerId: true },
+          take: 1,
+        },
       },
     });
 
@@ -87,6 +92,8 @@ function verifyBearerToken(req) {
 }
 
 function buildAppUser(user) {
+  const providerId = user.providerUsers?.[0]?.providerId || null;
+
   return {
     id: user.id,
     email: user.email,
@@ -94,6 +101,7 @@ function buildAppUser(user) {
     status: user.status,
     userType: user.userType,
     role: user.appRole,
+    providerId,
     providerProfile: user.providerProfile || null,
   };
 }

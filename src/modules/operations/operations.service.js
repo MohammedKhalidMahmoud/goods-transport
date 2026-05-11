@@ -10,11 +10,15 @@ class OperationsService {
     this.repo = new OperationsRepository();
   }
 
-  async listOffers(query, tenantScope) {
+  async listOffers(query, user, tenantScope) {
     const lq = parseListQuery(query, {});
     const where = { ...lq.where };
     if (tenantScope.type === 'provider' && tenantScope.providerId) {
       where.providerId = tenantScope.providerId;
+    } else if (tenantScope.type === 'self') {
+      where.order = { requesterId: user.id };
+    } else if (tenantScope.type === 'assignment') {
+      where.id = '___none___';
     }
     const { rows, total } = await this.repo.listOffers(where, lq.orderBy, lq.skip, lq.take);
     return { rows, total, page: lq.page, limit: lq.limit };
@@ -23,6 +27,10 @@ class OperationsService {
   async createOffer(body, user, tenantScope, app) {
     const providerId = tenantScope.providerId;
     if (!providerId) throw AppError.forbidden('Provider context required');
+    if (Number(body.price) <= 0) throw AppError.badRequest('Offer price must be greater than zero');
+    if (body.validUntil && new Date(body.validUntil) <= new Date()) {
+      throw AppError.badRequest('Offer validity date must be in the future');
+    }
 
     const order = await this.repo.findOrderById(body.orderId);
     if (!order) throw AppError.notFound('Order not found');
@@ -70,10 +78,10 @@ class OperationsService {
     return offer;
   }
 
-  async getOffer(id, tenantScope) {
+  async getOffer(id, user, tenantScope) {
     const offer = await this.repo.findOfferById(id, { order: true, provider: true });
     if (!offer) throw AppError.notFound();
-    this.assertProviderOfferScope(offer, tenantScope);
+    this.assertOfferScope(offer, user, tenantScope);
     return offer;
   }
 
@@ -264,6 +272,13 @@ class OperationsService {
     if (tenantScope.type === 'provider' && offer.providerId !== tenantScope.providerId) {
       throw AppError.forbidden();
     }
+  }
+
+  assertOfferScope(offer, user, tenantScope) {
+    if (tenantScope.type === 'global') return;
+    if (tenantScope.type === 'provider' && offer.providerId === tenantScope.providerId) return;
+    if (tenantScope.type === 'self' && offer.order?.requesterId === user.id) return;
+    throw AppError.forbidden();
   }
 }
 
