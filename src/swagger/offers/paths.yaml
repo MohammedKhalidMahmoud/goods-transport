@@ -68,52 +68,6 @@
         $ref: '#/components/responses/Success'
       '404':
         $ref: '#/components/responses/NotFound'
-  patch:
-    tags:
-      - Offers
-    summary: Update pending offer
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-        $ref: '#/components/responses/Success'
-      '400':
-        $ref: '#/components/responses/BadRequest'
-      '422':
-        $ref: '#/components/responses/Unprocessable'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              price:
-                type: number
-              notes:
-                type: string
-                nullable: true
-              validUntil:
-                type: string
-                format: date-time
-                nullable: true
-  delete:
-    tags:
-      - Offers
-    summary: Withdraw pending offer
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-        $ref: '#/components/responses/Success'
-      '422':
-        $ref: '#/components/responses/Unprocessable'
 /offers/{id}/accept:
   post:
     tags:

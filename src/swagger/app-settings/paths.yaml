@@ -1,86 +1,48 @@
-/app-settings:
+/app-settings/app:
   get:
     tags:
       - App Settings
-    summary: List app settings
+    summary: App Settings tab content
     security:
       - bearerAuth: []
     responses:
       '200':
-        $ref: '#/components/responses/Paginated'
         description: OK
-  post:
-    tags:
-      - App Settings
-    summary: Create app setting
-    security:
-      - bearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - key
-              - value
-            properties:
-              key:
-                type: string
-              value:
-                type: string
-              group:
-                type: string
-    responses:
-      '201':
-        $ref: '#/components/responses/Created'
-/app-settings/{id}:
+        $ref: '#/components/responses/Success'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+/app-settings/help-support:
   get:
     tags:
       - App Settings
-    summary: Get app setting
+    summary: Help & Support tab content
     security:
       - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
     responses:
       '200':
+        description: OK
         $ref: '#/components/responses/Success'
-  patch:
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+/app-settings/privacy-policy:
+  get:
     tags:
       - App Settings
-    summary: Update app setting
+    summary: Privacy Policy tab content
     security:
       - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              key:
-                type: string
-              value:
-                type: string
-              group:
-                type: string
     responses:
       '200':
+        description: OK
         $ref: '#/components/responses/Success'
-  delete:
-    tags:
-      - App Settings
-    summary: Delete app setting
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        $ref: '#/components/responses/Success'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
 /dashboard/app-settings:
   get:
     tags:

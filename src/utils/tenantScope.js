@@ -1,19 +1,17 @@
-const { INTERNAL_ROLES, COMPANY_ROLES, PROVIDER_ROLES } = require('../constants/roles');
+const { INTERNAL_ROLES, PROVIDER_ROLES } = require('../constants/roles');
 
 /**
  * Derives tenant scope from JWT-backed req.user fields and role membership.
  * Internal roles always get global scope regardless of stale JWT claims.
  */
 function buildTenantScopeFromUser(user) {
-  const { id: userId, companyId, providerId, branchId } = user;
+  const { id: userId, providerId } = user;
   const roles = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
 
   if (user.userType === 'DASHBOARD') {
     return {
       type: 'global',
       id: null,
-      branchId: null,
-      companyId: null,
       providerId: null,
     };
   }
@@ -22,19 +20,7 @@ function buildTenantScopeFromUser(user) {
     return {
       type: 'global',
       id: null,
-      branchId: null,
-      companyId: null,
       providerId: null,
-    };
-  }
-
-  if (companyId) {
-    return {
-      type: 'company',
-      id: companyId,
-      branchId: branchId || null,
-      companyId,
-      providerId: providerId || null,
     };
   }
 
@@ -42,8 +28,6 @@ function buildTenantScopeFromUser(user) {
     return {
       type: 'provider',
       id: providerId,
-      branchId: null,
-      companyId: null,
       providerId,
     };
   }
@@ -52,8 +36,6 @@ function buildTenantScopeFromUser(user) {
     return {
       type: 'self',
       id: userId,
-      branchId: null,
-      companyId: null,
       providerId: null,
     };
   }
@@ -62,8 +44,6 @@ function buildTenantScopeFromUser(user) {
     return {
       type: 'assignment',
       id: userId,
-      branchId: null,
-      companyId: null,
       providerId: providerId || null,
     };
   }
@@ -71,20 +51,14 @@ function buildTenantScopeFromUser(user) {
   return {
     type: 'self',
     id: userId,
-    branchId: null,
-    companyId: null,
     providerId: null,
   };
 }
 
 function assertTenantClaimsMatchRoles(user) {
   const roles = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
-  const needsCompany = roles.some((r) => COMPANY_ROLES.includes(r));
   const needsProvider = roles.some((r) => PROVIDER_ROLES.includes(r));
 
-  if (needsCompany && !user.companyId) {
-    return 'Company context is missing; re-login or contact support.';
-  }
   if (needsProvider && !user.providerId) {
     return 'Provider context is missing; re-login or contact support.';
   }

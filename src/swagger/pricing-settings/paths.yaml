@@ -9,90 +9,11 @@
       '200':
         $ref: '#/components/responses/Paginated'
         description: OK
-  post:
-    tags:
-      - Pricing Settings
-    summary: Create pricing setting
-    security:
-      - bearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - serviceTypeCode
-            properties:
-              serviceTypeCode:
-                type: string
-              baseFare:
-                type: number
-              perKmRate:
-                type: number
-              perWorkerRate:
-                type: number
-              floorRate:
-                type: number
-              fragileMultiplier:
-                type: number
-              currency:
-                type: string
-              isActive:
-                type: boolean
-    responses:
-      '201':
-        $ref: '#/components/responses/Created'
 /pricing-settings/{id}:
   get:
     tags:
       - Pricing Settings
     summary: Get pricing setting
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        $ref: '#/components/responses/Success'
-  patch:
-    tags:
-      - Pricing Settings
-    summary: Update pricing setting
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              serviceTypeCode:
-                type: string
-              baseFare:
-                type: number
-              perKmRate:
-                type: number
-              perWorkerRate:
-                type: number
-              floorRate:
-                type: number
-              fragileMultiplier:
-                type: number
-              currency:
-                type: string
-              isActive:
-                type: boolean
-    responses:
-      '200':
-        $ref: '#/components/responses/Success'
-  delete:
-    tags:
-      - Pricing Settings
-    summary: Delete pricing setting
     security:
       - bearerAuth: []
     parameters:
@@ -124,9 +45,9 @@
           schema:
             type: object
             required:
-              - serviceTypeCode
+              - serviceCode
             properties:
-              serviceTypeCode:
+              serviceCode:
                 type: string
               baseFare:
                 type: number
@@ -172,7 +93,7 @@
           schema:
             type: object
             properties:
-              serviceTypeCode:
+              serviceCode:
                 type: string
               baseFare:
                 type: number

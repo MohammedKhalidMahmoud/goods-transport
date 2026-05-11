@@ -3,27 +3,10 @@ const { AppError } = require('../../utils/AppError');
 const repository = require('./master-data.repository');
 
 const definitions = {
-  category: {
-    model: 'serviceCategory',
+  service: {
+    model: 'service',
     searchFields: ['name', 'code'],
-    notFound: 'Category not found',
-  },
-  serviceType: {
-    model: 'serviceType',
-    searchFields: ['name', 'code'],
-    notFound: 'Service type not found',
-    beforeList(query, lq) {
-      if (query.serviceCategoryId) lq.where.serviceCategoryId = query.serviceCategoryId;
-    },
-    async beforeCreate(data) {
-      const category = await repository.findServiceCategory(data.serviceCategoryId);
-      if (!category) throw AppError.notFound('Category not found');
-    },
-  },
-  vehicleType: {
-    model: 'vehicleType',
-    searchFields: ['name', 'code'],
-    notFound: 'Vehicle type not found',
+    notFound: 'Service not found',
   },
   city: {
     model: 'city',
@@ -32,7 +15,7 @@ const definitions = {
   },
   pricingSetting: {
     model: 'pricingSetting',
-    searchFields: ['serviceTypeCode'],
+    searchFields: ['serviceCode'],
     notFound: 'Pricing setting not found',
   },
   appSetting: {
@@ -79,11 +62,6 @@ async function updateResource(name, id, data, tenantScope) {
 async function deleteResource(name, id, tenantScope) {
   await getResource(name, id);
 
-  if (name === 'category') {
-    const count = await repository.countServiceTypesByCategory(id);
-    if (count > 0) throw AppError.conflict('Cannot delete category with service types');
-  }
-
   const def = definition(name);
   return repository.delete(def.model, id);
 }
@@ -97,16 +75,14 @@ const service = {
 };
 
 const aliases = {
-  Category: 'category',
-  ServiceType: 'serviceType',
-  VehicleType: 'vehicleType',
+  Service: 'service',
   City: 'city',
   PricingSetting: 'pricingSetting',
   AppSetting: 'appSetting',
 };
 
 for (const [suffix, resource] of Object.entries(aliases)) {
-  service[`list${suffix === 'Category' ? 'Categories' : `${suffix}s`}`] = (query, tenantScope) =>
+  service[`list${suffix}s`] = (query, tenantScope) =>
     listResource(resource, query, tenantScope);
   service[`get${suffix}`] = (id) => getResource(resource, id);
   service[`create${suffix}`] = (data, tenantScope) => createResource(resource, data, tenantScope);

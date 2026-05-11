@@ -29,28 +29,6 @@
     responses:
       '200':
         description: OK
-  patch:
-    tags:
-      - Tickets
-    summary: Update ticket
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-  delete:
-    tags:
-      - Tickets
-    summary: Delete ticket (super admin)
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
 /tickets/{id}/comments:
   get:
     tags:
@@ -74,42 +52,6 @@
     responses:
       '201':
         description: Created
-/tickets/{id}/assign:
-  post:
-    tags:
-      - Tickets
-    summary: Assign ticket
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-/tickets/{id}/resolve:
-  post:
-    tags:
-      - Tickets
-    summary: Resolve ticket
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-/tickets/{id}/close:
-  post:
-    tags:
-      - Tickets
-    summary: Close ticket
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
 /issue-types:
   get:
     tags:

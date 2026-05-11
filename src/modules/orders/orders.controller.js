@@ -109,6 +109,24 @@ const assignOrder = async (req, res, next) => {
   }
 };
 
+const acceptAssignedOrder = async (req, res, next) => {
+  try {
+    const result = await orderService.acceptAssignedOrder(req.params.id, req.body, req.user, req.tenantScope, req);
+    return success(res, result, 'Accepted');
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const rejectAssignedOrder = async (req, res, next) => {
+  try {
+    const result = await orderService.rejectAssignedOrder(req.params.id, req.body, req.user, req.tenantScope, req);
+    return success(res, result, 'Rejected');
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const transitionOrder = (status) => async (req, res, next) => {
   try {
     const order = await orderService.transitionSimple(req.params.id, status, req.user, req.tenantScope, req);
@@ -131,5 +149,7 @@ module.exports = {
   publishOrder,
   cancelOrder,
   assignOrder,
+  acceptAssignedOrder,
+  rejectAssignedOrder,
   transitionOrder,
 };

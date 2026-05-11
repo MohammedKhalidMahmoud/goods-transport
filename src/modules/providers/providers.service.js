@@ -6,7 +6,6 @@ const includeByModel = {
   providerDocument: { provider: true },
   providerDriver: { provider: true },
   providerWorker: { provider: true },
-  providerVehicle: { provider: true },
   providerUser: { provider: true, user: true },
 };
 

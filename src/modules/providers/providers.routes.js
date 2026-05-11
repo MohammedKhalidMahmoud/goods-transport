@@ -1,62 +1,11 @@
 const { Router } = require('express');
-const Joi = require('joi');
 const providersController = require('./providers.controller');
 const { authenticate } = require('../../middlewares/auth');
 const { authorizePermissions, resolveTenantScope } = require('../../middlewares/authorize');
-const { validate } = require('../../middlewares/validate');
 const { PERMISSIONS } = require('../../constants/permissions');
 
 const router = Router();
 const tenant = [authenticate, resolveTenantScope];
-
-const providerCreateSchema = { body: Joi.object({ name: Joi.string().required(), contactEmail: Joi.string().email().required(), contactPhone: Joi.string().required(), nameAr: Joi.string().allow('', null), address: Joi.string().allow('', null), taxNumber: Joi.string().allow('', null), licenseNumber: Joi.string().allow('', null) }) };
-const providerUpdateSchema = { params: Joi.object({ id: Joi.string().uuid().required() }), body: Joi.object({ name: Joi.string(), nameAr: Joi.string().allow('', null), contactEmail: Joi.string().email(), contactPhone: Joi.string(), address: Joi.string().allow('', null), taxNumber: Joi.string().allow('', null), licenseNumber: Joi.string().allow('', null), status: Joi.string(), isVerified: Joi.boolean(), isAcceptingOrders: Joi.boolean() }).min(1) };
-const availabilitySchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), dayOfWeek: Joi.number().integer().min(0).max(6).required(), startTime: Joi.string().required(), endTime: Joi.string().required() }) };
-const providerUserSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), userId: Joi.string().uuid().required(), role: Joi.string(), isActive: Joi.boolean() }) };
-const documentSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), documentType: Joi.string().required(), fileName: Joi.string().required(), originalName: Joi.string().required(), filePath: Joi.string().required(), mimeType: Joi.string().required(), fileSize: Joi.number().integer().required() }) };
-const driverSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), name: Joi.string().required(), phone: Joi.string().required(), userId: Joi.string().uuid().allow(null), licenseNumber: Joi.string().allow('', null) }) };
-const workerSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), name: Joi.string().required(), phone: Joi.string().allow('', null) }) };
-const vehicleSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), vehicleTypeId: Joi.string().uuid().required(), plateNumber: Joi.string().required() }) };
-
-router.get('/providers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ, PERMISSIONS.PROVIDERS_READ_OWN), providersController.listProviders);
-router.post('/providers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_CREATE), validate(providerCreateSchema), providersController.createProvider);
-router.get('/providers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ, PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProvider);
-router.patch('/providers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE, PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(providerUpdateSchema), providersController.updateProvider);
-router.delete('/providers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_DELETE), providersController.deleteProvider);
-router.post('/providers/:id/toggle-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN, PERMISSIONS.PROVIDERS_UPDATE), providersController.toggleAvailability);
-
-router.get('/provider-users', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderUsers);
-router.post('/provider-users', ...tenant, authorizePermissions(PERMISSIONS.USERS_CREATE, PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(providerUserSchema), providersController.createProviderUser);
-router.get('/provider-users/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderUser);
-router.patch('/provider-users/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.updateProviderUser);
-router.delete('/provider-users/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), providersController.deleteProviderUser);
-
-router.get('/provider-documents', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderDocuments);
-router.post('/provider-documents', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), validate(documentSchema), providersController.createProviderDocument);
-router.get('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.getProviderDocument);
-router.patch('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), providersController.updateProviderDocument);
-router.delete('/provider-documents/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_DOCUMENTS), providersController.deleteProviderDocument);
-
-router.get('/provider-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderAvailability);
-router.post('/provider-availability', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_UPDATE_OWN), validate(availabilitySchema), providersController.createProviderAvailability);
-
-router.get('/provider-drivers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderDrivers);
-router.post('/provider-drivers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), validate(driverSchema), providersController.createProviderDriver);
-router.get('/provider-drivers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderDriver);
-router.patch('/provider-drivers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.updateProviderDriver);
-router.delete('/provider-drivers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.deleteProviderDriver);
-
-router.get('/provider-workers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderWorkers);
-router.post('/provider-workers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), validate(workerSchema), providersController.createProviderWorker);
-router.get('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderWorker);
-router.patch('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.updateProviderWorker);
-router.delete('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.deleteProviderWorker);
-
-router.get('/provider-vehicles', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderVehicles);
-router.post('/provider-vehicles', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), validate(vehicleSchema), providersController.createProviderVehicle);
-router.get('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderVehicle);
-router.patch('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), providersController.updateProviderVehicle);
-router.delete('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), providersController.deleteProviderVehicle);
 
 router.get('/provider-wallet', ...tenant, authorizePermissions(PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.getWallet);
 router.get('/provider-earnings', ...tenant, authorizePermissions(PERMISSIONS.ANALYTICS_READ_PROVIDER, PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.getEarnings);

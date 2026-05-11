@@ -6,17 +6,13 @@
  * @property {string} status
  * @property {string[]} roles
  * @property {string[]} permissions
- * @property {string|null} companyId
  * @property {string|null} providerId
- * @property {string|null} branchId
  */
 
 /**
  * @typedef {object} TenantScope
- * @property {'global'|'company'|'provider'|'self'|'assignment'} type
- * @property {string|null} id        Primary scope id (companyId, providerId, or userId for self/assignment)
- * @property {string|null} branchId
- * @property {string|null} companyId
+ * @property {'global'|'provider'|'self'|'assignment'} type
+ * @property {string|null} id        Primary scope id (providerId or userId for self/assignment)
  * @property {string|null} providerId
  */
 

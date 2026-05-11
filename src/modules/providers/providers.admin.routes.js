@@ -16,7 +16,6 @@ const providerUserSchema = { body: Joi.object({ providerId: Joi.string().uuid().
 const documentSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), documentType: Joi.string().required(), fileName: Joi.string().required(), originalName: Joi.string().required(), filePath: Joi.string().required(), mimeType: Joi.string().required(), fileSize: Joi.number().integer().required() }) };
 const driverSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), name: Joi.string().required(), phone: Joi.string().required(), userId: Joi.string().uuid().allow(null), licenseNumber: Joi.string().allow('', null) }) };
 const workerSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), name: Joi.string().required(), phone: Joi.string().allow('', null) }) };
-const vehicleSchema = { body: Joi.object({ providerId: Joi.string().uuid().required(), vehicleTypeId: Joi.string().uuid().required(), plateNumber: Joi.string().required() }) };
 
 router.get('/providers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ, PERMISSIONS.PROVIDERS_READ_OWN), providersController.listProviders);
 router.post('/providers', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_CREATE), validate(providerCreateSchema), providersController.createProvider);
@@ -46,11 +45,6 @@ router.post('/provider-workers', ...tenant, authorizePermissions(PERMISSIONS.PRO
 router.get('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderWorker);
 router.patch('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.updateProviderWorker);
 router.delete('/provider-workers/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_WORKERS), providersController.deleteProviderWorker);
-router.get('/provider-vehicles', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN, PERMISSIONS.PROVIDERS_READ), providersController.listProviderVehicles);
-router.post('/provider-vehicles', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), validate(vehicleSchema), providersController.createProviderVehicle);
-router.get('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_READ_OWN), providersController.getProviderVehicle);
-router.patch('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), providersController.updateProviderVehicle);
-router.delete('/provider-vehicles/:id', ...tenant, authorizePermissions(PERMISSIONS.PROVIDERS_MANAGE_VEHICLES), providersController.deleteProviderVehicle);
 router.get('/provider-wallet', ...tenant, authorizePermissions(PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.getWallet);
 router.get('/provider-earnings', ...tenant, authorizePermissions(PERMISSIONS.ANALYTICS_READ_PROVIDER, PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.getEarnings);
 router.get('/provider-settlements', ...tenant, authorizePermissions(PERMISSIONS.SETTLEMENTS_READ_OWN), providersController.listSettlements);

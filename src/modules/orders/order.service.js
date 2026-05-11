@@ -1,31 +1,13 @@
 const { parseListQuery } = require('../../lib/listQuery');
 const { AppError } = require('../../utils/AppError');
-const { mergeWhere, companyTenantWhere, requesterSelfWhere } = require('../../utils/tenantQuery');
+const { mergeWhere, requesterSelfWhere } = require('../../utils/tenantQuery');
 const { assertCanViewOrder, loadOrderForAccess } = require('./order.access');
 const { writeAudit } = require('../../services/audit.service');
-const { getIo, emitOrder, emitProvider, emitCompany, EVENTS } = require('../../lib/socketEmitter');
+const { getIo, emitOrder, emitProvider, EVENTS } = require('../../lib/socketEmitter');
 const ordersRepository = require('./orders.repository');
 
 function orderNumber() {
   return `GT-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
-
-async function needsCompanyApproval(order) {
-  if (order.sourceType !== 'company' || !order.companyId) return false;
-
-  const rules = await ordersRepository.findApprovalRules(order.companyId);
-  if (rules.length === 0) return false;
-
-  const serviceType = await ordersRepository.findServiceType(order.serviceTypeId);
-  const code = serviceType?.code || null;
-  const price = Number(order.estimatedPrice ?? order.finalPrice ?? 0);
-
-  return rules.some((rule) => {
-    if (rule.serviceTypeCode && rule.serviceTypeCode !== code) return false;
-    if (rule.minAmount != null && price < Number(rule.minAmount)) return false;
-    if (rule.maxAmount != null && price > Number(rule.maxAmount)) return false;
-    return true;
-  });
 }
 
 async function listOrders(query, user, tenantScope) {
@@ -34,9 +16,6 @@ async function listOrders(query, user, tenantScope) {
 
   if (tenantScope.type === 'global') {
     base = mergeWhere(base, {});
-  } else if (tenantScope.type === 'company') {
-    const filter = companyTenantWhere(tenantScope);
-    base = mergeWhere(base, filter || { id: '___none___' });
   } else if (tenantScope.type === 'self') {
     const filter = requesterSelfWhere(tenantScope);
     base = mergeWhere(base, filter || { id: '___none___' });
@@ -71,9 +50,7 @@ async function listOrders(query, user, tenantScope) {
 
 async function createOrder(body, user, tenantScope, req) {
   const {
-    sourceType,
-    serviceTypeId,
-    vehicleTypeId,
+    serviceId,
     workerCount,
     isFragile,
     notes,
@@ -84,21 +61,11 @@ async function createOrder(body, user, tenantScope, req) {
     items,
   } = body;
 
-  let companyId = null;
-  let src = sourceType || 'individual';
-  if (tenantScope.type === 'company') {
-    companyId = tenantScope.companyId;
-    src = 'company';
-  }
-
   const order = await ordersRepository.createOrderWithDetails(
     {
       orderNumber: orderNumber(),
-      sourceType: src,
       requesterId: user.id,
-      companyId,
-      serviceTypeId,
-      vehicleTypeId: vehicleTypeId || null,
+      serviceId,
       workerCount: workerCount ?? 1,
       isFragile: !!isFragile,
       notes,
@@ -119,14 +86,12 @@ async function createOrder(body, user, tenantScope, req) {
 
 async function updateOrder(orderId, body, user, tenantScope, req) {
   const order = await assertCanViewOrder(user, tenantScope, orderId);
-  if (!['draft', 'submitted', 'pending_approval'].includes(order.status) && tenantScope.type !== 'global') {
+  if (!['draft', 'submitted'].includes(order.status) && tenantScope.type !== 'global') {
     throw AppError.unprocessable('Order cannot be edited in current status');
   }
   if (tenantScope.type === 'self' && order.requesterId !== user.id) throw AppError.forbidden();
-  if (tenantScope.type === 'company' && order.companyId !== tenantScope.companyId) throw AppError.forbidden();
 
   const updated = await ordersRepository.updateOrder(orderId, {
-    vehicleTypeId: body.vehicleTypeId,
     workerCount: body.workerCount,
     isFragile: body.isFragile,
     notes: body.notes,
@@ -156,20 +121,17 @@ async function submitOrder(orderId, user, tenantScope, req) {
   const hasDropoff = locations.some((location) => location.type === 'dropoff');
   if (!hasPickup || !hasDropoff) throw AppError.badRequest('Pickup and dropoff locations required');
 
-  const approval = await needsCompanyApproval(order);
-  await ordersRepository.submitOrder(orderId, order, approval, user.id);
+  await ordersRepository.submitOrder(orderId, user.id);
 
   const io = getIo(req.app);
   emitOrder(io, orderId, EVENTS.ORDER_STATUS, { orderId, status: 'published_for_offers' });
-  if (order.companyId) emitCompany(io, order.companyId, EVENTS.ORDER_STATUS, { orderId });
 
   return ordersRepository.findOrderAfterSubmit(orderId);
 }
 
 async function publishOrder(orderId, user, tenantScope, req) {
   const order = await assertCanViewOrder(user, tenantScope, orderId);
-  const allowed = ['submitted', 'approved'];
-  if (!allowed.includes(order.status)) throw AppError.unprocessable('Cannot publish from this status');
+  if (order.status !== 'submitted') throw AppError.unprocessable('Cannot publish from this status');
 
   await ordersRepository.publishOrder(orderId, order.status, user.id);
   const io = getIo(req.app);
@@ -202,6 +164,56 @@ async function assignOrder(orderId, body, user, tenantScope, req) {
   emitOrder(io, orderId, EVENTS.ORDER_ASSIGNED, { orderId, assignmentId: assignment.id });
   emitProvider(io, body.providerId, EVENTS.ORDER_ASSIGNED, { orderId });
   return assignment;
+}
+
+async function acceptAssignedOrder(orderId, body, user, tenantScope, req) {
+  if (tenantScope.type !== 'provider' || !tenantScope.providerId) {
+    throw AppError.forbidden('Provider context required');
+  }
+
+  const assignment = await ordersRepository.findPendingAssignmentForProviderOrder(orderId, tenantScope.providerId);
+  if (!assignment) {
+    throw AppError.notFound('Pending assignment not found for this provider');
+  }
+
+  if (body.driverId) {
+    const driver = await ordersRepository.findProviderDriver(body.driverId, tenantScope.providerId);
+    if (!driver) throw AppError.badRequest('Invalid driverId for this provider');
+  }
+
+  const updated = await ordersRepository.acceptProviderAssignment(assignment.id, {
+    driverId: body.driverId || assignment.driverId || null,
+    notes: body.notes,
+    updatedBy: user.id,
+  });
+
+  const io = getIo(req.app);
+  emitOrder(io, orderId, EVENTS.ORDER_ASSIGNED, { orderId, assignmentId: assignment.id, status: 'accepted' });
+  emitProvider(io, tenantScope.providerId, EVENTS.ORDER_ASSIGNED, { orderId, assignmentId: assignment.id, status: 'accepted' });
+
+  return updated;
+}
+
+async function rejectAssignedOrder(orderId, body, user, tenantScope, req) {
+  if (tenantScope.type !== 'provider' || !tenantScope.providerId) {
+    throw AppError.forbidden('Provider context required');
+  }
+
+  const assignment = await ordersRepository.findPendingAssignmentForProviderOrder(orderId, tenantScope.providerId);
+  if (!assignment) {
+    throw AppError.notFound('Pending assignment not found for this provider');
+  }
+
+  const updated = await ordersRepository.rejectProviderAssignment(assignment, {
+    reason: body.reason || 'Rejected by provider',
+    updatedBy: user.id,
+  });
+
+  const io = getIo(req.app);
+  emitOrder(io, orderId, EVENTS.ORDER_STATUS, { orderId, status: updated.order.status });
+  emitProvider(io, tenantScope.providerId, EVENTS.ORDER_STATUS, { orderId, assignmentId: assignment.id, status: 'rejected' });
+
+  return updated;
 }
 
 async function transitionSimple(orderId, nextStatus, user, tenantScope, req, notes = '') {
@@ -250,6 +262,8 @@ module.exports = {
   publishOrder,
   cancelOrder,
   assignOrder,
+  acceptAssignedOrder,
+  rejectAssignedOrder,
   transitionSimple,
   getOrderTimeline,
   listOrderAttachments,

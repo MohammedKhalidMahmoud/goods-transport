@@ -7,7 +7,7 @@ async function loadTicketForAccess(ticketId) {
   if (!tkt) return null;
 
   // Ticket has `orderId` but no Prisma relation to Order in the current schema.
-  // Load minimal order context separately when present (used for company-scope access checks).
+  // Load minimal order context separately when present.
   if (tkt.orderId) {
     const order = await supportRepository.findOrderAccessContext(tkt.orderId);
     return { ...tkt, order };
@@ -17,7 +17,7 @@ async function loadTicketForAccess(ticketId) {
 }
 
 /**
- * Ticket readable by: owner, internal (tickets:read), or company scope (tickets:read_company + same company).
+ * Ticket readable by: owner or internal (tickets:read).
  */
 async function assertCanViewTicket(req, ticketId) {
   const tkt = await loadTicketForAccess(ticketId);
@@ -27,13 +27,6 @@ async function assertCanViewTicket(req, ticketId) {
 
   const perms = req.user.permissions || [];
   if (perms.includes(PERMISSIONS.TICKETS_READ)) return tkt;
-
-  if (perms.includes(PERMISSIONS.TICKETS_READ_COMPANY) && req.tenantScope?.type === 'company') {
-    const companyId = req.tenantScope.companyId;
-    const submitterInCompany = await supportRepository.findCompanyUser(tkt.userId, companyId);
-    const orderMatchesCompany = tkt.order?.companyId === companyId;
-    if (submitterInCompany || orderMatchesCompany) return tkt;
-  }
 
   throw AppError.forbidden('Cannot access this ticket');
 }

@@ -59,13 +59,6 @@ class AuthRepository {
     });
   }
 
-  async getCompanyContext(userId) {
-    return prisma.companyUser.findFirst({
-      where: { userId },
-      select: { companyId: true, branchId: true },
-    });
-  }
-
   async getProviderContext(userId) {
     return prisma.providerUser.findFirst({
       where: { userId },

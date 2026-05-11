@@ -11,13 +11,7 @@ class SupportRepository {
   findOrderAccessContext(orderId) {
     return prisma.order.findUnique({
       where: { id: orderId },
-      select: { id: true, companyId: true, requesterId: true },
-    });
-  }
-
-  findCompanyUser(userId, companyId) {
-    return prisma.companyUser.findFirst({
-      where: { userId, companyId },
+      select: { id: true, requesterId: true },
     });
   }
 }

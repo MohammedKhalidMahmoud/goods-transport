@@ -3,13 +3,13 @@ const { authenticate } = require('../../middlewares/auth');
 const { authorizePermissions } = require('../../middlewares/authorize');
 const { validate } = require('../../middlewares/validate');
 const { PERMISSIONS } = require('../../constants/permissions');
-const controller = require('./cities.controller');
+const controller = require('./services.controller');
 const v = require('../master-data/master-data.validation');
 
 const router = Router();
 const read = [authenticate, authorizePermissions(PERMISSIONS.MASTER_DATA_READ)];
 
-router.get('/cities', ...read, controller.list);
-router.get('/cities/:id', ...read, validate({ params: v.idParam }), controller.get);
+router.get('/services', ...read, controller.list);
+router.get('/services/:id', ...read, validate({ params: v.idParam }), controller.get);
 
 module.exports = router;

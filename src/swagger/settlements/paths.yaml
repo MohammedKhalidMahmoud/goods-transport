@@ -8,15 +8,6 @@
     responses:
       '200':
         description: OK
-  post:
-    tags:
-      - Settlements
-    summary: Create settlement
-    security:
-      - bearerAuth: []
-    responses:
-      '201':
-        description: Created
 /settlements/{id}:
   get:
     tags:

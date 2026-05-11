@@ -10,9 +10,7 @@ const router = Router();
 const tenant = [authenticate, resolveTenantScope];
 
 const orderCreate = Joi.object({
-  sourceType: Joi.string().valid('individual', 'company'),
-  serviceTypeId: Joi.string().uuid().required(),
-  vehicleTypeId: Joi.string().uuid().allow(null),
+  serviceId: Joi.string().uuid().required(),
   workerCount: Joi.number().integer().min(1),
   isFragile: Joi.boolean(),
   notes: Joi.string().allow('', null),
@@ -54,7 +52,6 @@ router.get(
   ...tenant,
   authorizePermissions(
     PERMISSIONS.ORDERS_READ,
-    PERMISSIONS.ORDERS_READ_COMPANY,
     PERMISSIONS.ORDERS_READ_OWN,
     PERMISSIONS.ORDERS_READ_PROVIDER
   ),
@@ -74,30 +71,10 @@ router.get(
   ...tenant,
   authorizePermissions(
     PERMISSIONS.ORDERS_READ,
-    PERMISSIONS.ORDERS_READ_COMPANY,
     PERMISSIONS.ORDERS_READ_OWN,
     PERMISSIONS.ORDERS_READ_PROVIDER
   ),
   ordersController.getOrder
-);
-
-router.patch(
-  '/orders/:id',
-  ...tenant,
-  authorizePermissions(PERMISSIONS.ORDERS_UPDATE, PERMISSIONS.ORDERS_UPDATE_OWN),
-  validate({
-    params: idParam,
-    body: orderCreate.fork(['serviceTypeId', 'locations', 'items'], (schema) => schema.optional()),
-  }),
-  ordersController.updateOrder
-);
-
-router.delete(
-  '/orders/:id',
-  ...tenant,
-  authorizePermissions(PERMISSIONS.ORDERS_UPDATE_OWN, PERMISSIONS.ORDERS_UPDATE),
-  validate({ params: idParam }),
-  ordersController.deleteOrder
 );
 
 router.get('/orders/:id/timeline', ...tenant, ordersController.getTimeline);
@@ -124,13 +101,6 @@ router.post(
 router.post('/orders/:id/submit', ...tenant, authorizePermissions(PERMISSIONS.ORDERS_SUBMIT), ordersController.submitOrder);
 
 router.post(
-  '/orders/:id/publish',
-  ...tenant,
-  authorizePermissions(PERMISSIONS.ORDERS_UPDATE, PERMISSIONS.ORDERS_READ_COMPANY),
-  ordersController.publishOrder
-);
-
-router.post(
   '/orders/:id/cancel',
   ...tenant,
   authorizePermissions(PERMISSIONS.ORDERS_CANCEL),
@@ -139,16 +109,30 @@ router.post(
 );
 
 router.post(
-  '/orders/:id/assign',
+  '/orders/:id/accept',
   ...tenant,
-  authorizePermissions(PERMISSIONS.ASSIGNMENTS_CREATE, PERMISSIONS.ORDERS_UPDATE),
+  authorizePermissions(PERMISSIONS.ASSIGNMENTS_UPDATE_STATUS),
   validate({
+    params: idParam,
     body: Joi.object({
-      providerId: Joi.string().uuid().required(),
       driverId: Joi.string().uuid().allow(null),
+      notes: Joi.string().allow('', null),
     }),
   }),
-  ordersController.assignOrder
+  ordersController.acceptAssignedOrder
+);
+
+router.post(
+  '/orders/:id/reject',
+  ...tenant,
+  authorizePermissions(PERMISSIONS.ASSIGNMENTS_UPDATE_STATUS),
+  validate({
+    params: idParam,
+    body: Joi.object({
+      reason: Joi.string().allow('', null),
+    }),
+  }),
+  ordersController.rejectAssignedOrder
 );
 
 router.post(

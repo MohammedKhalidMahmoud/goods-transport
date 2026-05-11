@@ -9,7 +9,6 @@ function canViewOrder(user, tenantScope, order) {
   if (!order) return false;
   const roles = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
   if (roles.some((r) => INTERNAL_ROLES.includes(r))) return true;
-  if (tenantScope.type === 'company' && order.companyId === tenantScope.companyId) return true;
   if (tenantScope.type === 'self' && order.requesterId === user.id) return true;
   if (tenantScope.type === 'provider' && tenantScope.providerId) {
     return (

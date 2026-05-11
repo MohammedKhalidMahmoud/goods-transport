@@ -9,14 +9,6 @@ function mergeWhere(baseWhere, fragment) {
   return { AND: [baseWhere, fragment] };
 }
 
-function companyTenantWhere(tenantScope) {
-  if (tenantScope.type === 'global') return {};
-  if (tenantScope.type === 'company' && tenantScope.companyId) {
-    return { companyId: tenantScope.companyId };
-  }
-  return null;
-}
-
 function providerTenantWhere(tenantScope) {
   if (tenantScope.type === 'global') return {};
   if (tenantScope.type === 'provider' && tenantScope.providerId) {
@@ -34,7 +26,6 @@ function requesterSelfWhere(tenantScope) {
 
 module.exports = {
   mergeWhere,
-  companyTenantWhere,
   providerTenantWhere,
   requesterSelfWhere,
 };

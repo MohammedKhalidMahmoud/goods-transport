@@ -10,9 +10,7 @@ const router = Router();
 const tenant = [authenticateDashboard, resolveTenantScope];
 
 const orderCreate = Joi.object({
-  sourceType: Joi.string().valid('individual', 'company'),
-  serviceTypeId: Joi.string().uuid().required(),
-  vehicleTypeId: Joi.string().uuid().allow(null),
+  serviceId: Joi.string().uuid().required(),
   workerCount: Joi.number().integer().min(1),
   isFragile: Joi.boolean(),
   notes: Joi.string().allow('', null),
@@ -54,7 +52,6 @@ router.get(
   ...tenant,
   authorizePermissions(
     PERMISSIONS.ORDERS_READ,
-    PERMISSIONS.ORDERS_READ_COMPANY,
     PERMISSIONS.ORDERS_READ_OWN,
     PERMISSIONS.ORDERS_READ_PROVIDER
   ),
@@ -74,7 +71,6 @@ router.get(
   ...tenant,
   authorizePermissions(
     PERMISSIONS.ORDERS_READ,
-    PERMISSIONS.ORDERS_READ_COMPANY,
     PERMISSIONS.ORDERS_READ_OWN,
     PERMISSIONS.ORDERS_READ_PROVIDER
   ),
@@ -87,7 +83,7 @@ router.patch(
   authorizePermissions(PERMISSIONS.ORDERS_UPDATE, PERMISSIONS.ORDERS_UPDATE_OWN),
   validate({
     params: idParam,
-    body: orderCreate.fork(['serviceTypeId', 'locations', 'items'], (schema) => schema.optional()),
+    body: orderCreate.fork(['serviceId', 'locations', 'items'], (schema) => schema.optional()),
   }),
   ordersController.updateOrder
 );
@@ -125,7 +121,7 @@ router.post('/orders/:id/submit', ...tenant, authorizePermissions(PERMISSIONS.OR
 router.post(
   '/orders/:id/publish',
   ...tenant,
-  authorizePermissions(PERMISSIONS.ORDERS_UPDATE, PERMISSIONS.ORDERS_READ_COMPANY),
+  authorizePermissions(PERMISSIONS.ORDERS_UPDATE),
   ordersController.publishOrder
 );
 

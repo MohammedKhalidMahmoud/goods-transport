@@ -8,31 +8,11 @@
     responses:
       '200':
         description: OK
-  post:
-    tags:
-      - Payments
-    summary: Create payment
-    security:
-      - bearerAuth: []
-    responses:
-      '201':
-        description: Created
 /payments/{id}:
   get:
     tags:
       - Payments
     summary: Get payment
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-  patch:
-    tags:
-      - Payments
-    summary: Update payment
     security:
       - bearerAuth: []
     parameters:

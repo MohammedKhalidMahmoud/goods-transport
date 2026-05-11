@@ -9,77 +9,11 @@
       '200':
         $ref: '#/components/responses/Paginated'
         description: OK
-  post:
-    tags:
-      - Cities
-    summary: Create city
-    security:
-      - bearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - code
-              - name
-            properties:
-              code:
-                type: string
-              name:
-                type: string
-              nameAr:
-                type: string
-                nullable: true
-              isActive:
-                type: boolean
-    responses:
-      '201':
-        $ref: '#/components/responses/Created'
 /cities/{id}:
   get:
     tags:
       - Cities
     summary: Get city
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        $ref: '#/components/responses/Success'
-  patch:
-    tags:
-      - Cities
-    summary: Update city
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: string
-              name:
-                type: string
-              nameAr:
-                type: string
-                nullable: true
-              isActive:
-                type: boolean
-    responses:
-      '200':
-        $ref: '#/components/responses/Success'
-  delete:
-    tags:
-      - Cities
-    summary: Delete city
     security:
       - bearerAuth: []
     parameters:

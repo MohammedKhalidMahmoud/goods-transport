@@ -11,8 +11,7 @@ class OrdersRepository {
     return prisma.order.findFirst({
       where: { id: orderId, deletedAt: null },
       include: {
-        serviceType: true,
-        vehicleType: true,
+        service: true,
         requester: true,
         locations: true,
         items: true,
@@ -57,18 +56,12 @@ class OrdersRepository {
       orderBy,
       skip,
       take,
-      include: { serviceType: true, company: true, requester: true },
+      include: { service: true, requester: true },
     });
   }
 
-  findApprovalRules(companyId) {
-    return prisma.approvalRule.findMany({
-      where: { companyId, isActive: true },
-    });
-  }
-
-  findServiceType(id) {
-    return prisma.serviceType.findUnique({ where: { id } });
+  findService(id) {
+    return prisma.service.findUnique({ where: { id } });
   }
 
   async createOrderWithDetails(data, locations, items, userId) {
@@ -117,7 +110,7 @@ class OrdersRepository {
   findOrderWithDetails(orderId) {
     return prisma.order.findUnique({
       where: { id: orderId },
-      include: { locations: true, items: true, serviceType: true },
+      include: { locations: true, items: true, service: true },
     });
   }
 
@@ -125,7 +118,7 @@ class OrdersRepository {
     return prisma.order.update({
       where: { id: orderId },
       data,
-      include: { locations: true, items: true, serviceType: true },
+      include: { locations: true, items: true, service: true },
     });
   }
 
@@ -140,25 +133,14 @@ class OrdersRepository {
     return prisma.orderLocation.findMany({ where: { orderId } });
   }
 
-  async submitOrder(orderId, order, approvalRequired, userId) {
+  async submitOrder(orderId, userId) {
     return prisma.$transaction(async (tx) => {
-      if (approvalRequired) {
-        await tx.order.update({
-          where: { id: orderId },
-          data: { status: 'pending_approval', updatedBy: userId },
-        });
-        await appendHistory(tx, orderId, 'draft', 'submitted', userId, 'Submitted');
-        await appendHistory(tx, orderId, 'submitted', 'pending_approval', userId, 'Awaiting approval');
-        return;
-      }
-
-      const notes = order.sourceType === 'company' ? 'Auto-published' : 'Published';
       await tx.order.update({
         where: { id: orderId },
         data: { status: 'published_for_offers', updatedBy: userId },
       });
       await appendHistory(tx, orderId, 'draft', 'submitted', userId, 'Submitted');
-      await appendHistory(tx, orderId, 'submitted', 'published_for_offers', userId, notes);
+      await appendHistory(tx, orderId, 'submitted', 'published_for_offers', userId, 'Published');
     });
   }
 
@@ -216,6 +198,73 @@ class OrdersRepository {
       });
       await appendHistory(tx, orderId, fromStatus, 'assigned', userId, 'Assigned');
       return assignment;
+    });
+  }
+
+  findPendingAssignmentForProviderOrder(orderId, providerId) {
+    return prisma.assignment.findFirst({
+      where: { orderId, providerId, status: 'pending' },
+      include: { order: true, provider: true, driver: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  findProviderDriver(driverId, providerId) {
+    return prisma.providerDriver.findFirst({
+      where: { id: driverId, providerId, isActive: true },
+    });
+  }
+
+  async acceptProviderAssignment(assignmentId, data) {
+    return prisma.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        status: 'accepted',
+        driverId: data.driverId,
+        notes: data.notes,
+        acceptedAt: new Date(),
+      },
+      include: { order: true, provider: true, driver: true },
+    });
+  }
+
+  async rejectProviderAssignment(assignment, data) {
+    return prisma.$transaction(async (tx) => {
+      const updatedAssignment = await tx.assignment.update({
+        where: { id: assignment.id },
+        data: {
+          status: 'rejected',
+          notes: data.reason,
+        },
+        include: { provider: true, driver: true },
+      });
+
+      const activeAssignments = await tx.assignment.count({
+        where: {
+          orderId: assignment.orderId,
+          id: { not: assignment.id },
+          status: { in: ['pending', 'accepted', 'in_progress'] },
+        },
+      });
+
+      let order = assignment.order;
+      if (activeAssignments === 0 && assignment.order.status === 'assigned') {
+        order = await tx.order.update({
+          where: { id: assignment.orderId },
+          data: { status: 'offer_accepted', updatedBy: data.updatedBy },
+        });
+        await tx.orderStatusHistory.create({
+          data: {
+            orderId: assignment.orderId,
+            fromStatus: assignment.order.status,
+            toStatus: 'offer_accepted',
+            changedBy: data.updatedBy,
+            notes: data.reason,
+          },
+        });
+      }
+
+      return { assignment: updatedAssignment, order };
     });
   }
 

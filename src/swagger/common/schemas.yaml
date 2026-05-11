@@ -1,92 +1,80 @@
 tags:
   - name: Auth
     description: App authentication and session management
-  - name: Admin Auth
-    description: Dashboard authentication and session management
   - name: System
     description: Health and platform probes
-  - name: Service Categories
-    description: Service category master data
-  - name: Admin Service Categories
-    description: Dashboard service category management
-  - name: Service Types
-    description: Service type master data
-  - name: Admin Service Types
-    description: Dashboard service type management
-  - name: Vehicle Types
-    description: Vehicle type master data
-  - name: Admin Vehicle Types
-    description: Dashboard vehicle type management
+  - name: Services
+    description: Service master data
   - name: Cities
     description: Supported city master data
-  - name: Admin Cities
-    description: Dashboard city management
   - name: Pricing Settings
     description: Pricing configuration
-  - name: Admin Pricing Settings
-    description: Dashboard pricing configuration
   - name: App Settings
     description: Application settings
+  - name: Providers
+    description: App provider endpoints
+  - name: Orders
+    description: Order lifecycle management
+  - name: Offers
+    description: Provider offer management
+  - name: Assignments
+    description: Driver/team assignments
+  - name: Tracking
+    description: Real-time tracking events
+  - name: Delivery Proof
+    description: Delivery proofs
+  - name: Invoices
+    description: Invoice management
+  - name: Payments
+    description: Payment management
+  - name: Commissions
+    description: Commission management
+  - name: Settlements
+    description: Settlement management
+  - name: Earnings
+    description: Earnings summaries
+  - name: Tickets
+    description: Tickets and issue management
+  - name: Notifications
+    description: In-app notifications
+  - name: Admin Auth
+    description: Dashboard authentication and session management
+  - name: Admin Services
+    description: Dashboard service management
+  - name: Admin Cities
+    description: Dashboard city management
+  - name: Admin Pricing Settings
+    description: Dashboard pricing configuration
   - name: Admin App Settings
     description: Dashboard application settings
   - name: Admin Users
     description: Dashboard user management
   - name: Admin RBAC
     description: Dashboard roles and permissions
-  - name: Companies
-    description: App company endpoints
-  - name: Admin Companies
-    description: Dashboard company management
-  - name: Approvals
-    description: Company approval workflow
-  - name: Providers
-    description: App provider endpoints
   - name: Admin Providers
     description: Dashboard provider management
-  - name: Orders
-    description: Order lifecycle management
-  - name: Offers
-    description: Provider offer management
+  - name: Admin Orders
+    description: Dashboard order management
   - name: Admin Offers
     description: Dashboard offer management
-  - name: Assignments
-    description: Driver/team assignments
   - name: Admin Assignments
     description: Dashboard assignment management
-  - name: Tracking
-    description: Real-time tracking events
   - name: Admin Tracking
     description: Dashboard tracking management
-  - name: Delivery Proof
-    description: Delivery proofs
   - name: Admin Delivery Proof
     description: Dashboard delivery proof management
-  - name: Invoices
-    description: Invoice management
   - name: Admin Invoices
     description: Dashboard invoice management
-  - name: Payments
-    description: Payment management
   - name: Admin Payments
     description: Dashboard payment management
-  - name: Commissions
-    description: Commission management
   - name: Admin Commissions
     description: Dashboard commission management
-  - name: Settlements
-    description: Settlement management
   - name: Admin Settlements
     description: Dashboard settlement management
-  - name: Earnings
-    description: Earnings summaries
   - name: Admin Earnings
     description: Dashboard earnings summaries
-  - name: Tickets
-    description: Tickets and issue management
   - name: Admin Tickets
     description: Dashboard ticket management
-  - name: Notifications
-    description: In-app notifications
   - name: Admin Notifications
     description: Dashboard notification management
 components:

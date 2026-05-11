@@ -8,66 +8,11 @@
     responses:
       '200':
         description: OK
-  post:
-    tags:
-      - Invoices
-    summary: Create invoice
-    security:
-      - bearerAuth: []
-    responses:
-      '201':
-        description: Created
 /invoices/{id}:
   get:
     tags:
       - Invoices
     summary: Get invoice
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-  patch:
-    tags:
-      - Invoices
-    summary: Update invoice
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-  delete:
-    tags:
-      - Invoices
-    summary: Delete invoice
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-/invoices/{id}/issue:
-  post:
-    tags:
-      - Invoices
-    summary: Issue invoice
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-/invoices/{id}/mark-paid:
-  post:
-    tags:
-      - Invoices
-    summary: Mark invoice paid
     security:
       - bearerAuth: []
     parameters:

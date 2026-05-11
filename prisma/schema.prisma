@@ -31,9 +31,6 @@ enum AppRole {
 enum OrderStatus {
   draft
   submitted
-  pending_approval
-  approved
-  rejected
   published_for_offers
   offer_received
   offer_accepted
@@ -54,12 +51,6 @@ enum OfferStatus {
   rejected
   expired
   withdrawn
-}
-
-enum ApprovalStatus {
-  pending
-  approved
-  rejected
 }
 
 enum InvoiceStatus {
@@ -92,11 +83,6 @@ enum AssignmentStatus {
   in_progress
   completed
   canceled
-}
-
-enum SourceType {
-  individual
-  company
 }
 
 enum LocationType {
@@ -167,7 +153,6 @@ model User {
   otpVerifications    OtpVerification[]
   notifications       Notification[]
   userRoles           UserRole[]
-  companyUsers        CompanyUser[]
   providerUsers       ProviderUser[]
   ordersRequested     Order[]               @relation("OrderRequester")
 
@@ -337,57 +322,20 @@ model Notification {
 // MASTER DATA
 // ============================================================
 
-model ServiceCategory {
+model Service {
   id          String   @id @default(uuid())
   code        String   @unique
   name        String
   nameAr      String?  @map("name_ar")
   description String?  @db.Text
-  icon        String?
-  sortOrder   Int      @default(0) @map("sort_order")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  serviceTypes ServiceType[]
-
-  @@map("service_categories")
-}
-
-model ServiceType {
-  id                String   @id @default(uuid())
-  serviceCategoryId String   @map("service_category_id")
-  code              String   @unique
-  name              String
-  nameAr            String?  @map("name_ar")
-  description       String?  @db.Text
-  isActive          Boolean  @default(true) @map("is_active")
-  sortOrder         Int      @default(0) @map("sort_order")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-
-  serviceCategory ServiceCategory @relation(fields: [serviceCategoryId], references: [id])
-  orders          Order[]
-
-  @@map("service_types")
-}
-
-model VehicleType {
-  id          String   @id @default(uuid())
-  code        String   @unique
-  name        String
-  nameAr      String?  @map("name_ar")
-  description String?  @db.Text
-  capacity    String?
   isActive    Boolean  @default(true) @map("is_active")
   sortOrder   Int      @default(0) @map("sort_order")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  providerVehicles ProviderVehicle[]
-  orders           Order[]
+  orders Order[]
 
-  @@map("vehicle_types")
+  @@map("services")
 }
 
 model City {
@@ -404,7 +352,7 @@ model City {
 
 model PricingSetting {
   id                String   @id @default(uuid())
-  serviceTypeCode   String   @map("service_type_code")
+  serviceCode       String   @map("service_code")
   baseFare          Decimal  @default(0) @map("base_fare") @db.Decimal(12, 2)
   perKmRate         Decimal  @default(0) @map("per_km_rate") @db.Decimal(12, 2)
   perWorkerRate     Decimal  @default(0) @map("per_worker_rate") @db.Decimal(12, 2)
@@ -415,7 +363,7 @@ model PricingSetting {
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
-  @@unique([serviceTypeCode])
+  @@unique([serviceCode])
   @@map("pricing_settings")
 }
 
@@ -458,7 +406,6 @@ model Provider {
   providerAvailability ProviderAvailability[]
   providerWorkers      ProviderWorker[]
   providerDrivers      ProviderDriver[]
-  providerVehicles     ProviderVehicle[]
   providerWallet       ProviderWallet?
   offers               Offer[]
   assignments          Assignment[]
@@ -563,26 +510,6 @@ model ProviderDriver {
   @@map("provider_drivers")
 }
 
-model ProviderVehicle {
-  id            String   @id @default(uuid())
-  providerId    String   @map("provider_id")
-  vehicleTypeId String   @map("vehicle_type_id")
-  plateNumber   String   @map("plate_number")
-  make          String?
-  model         String?
-  year          Int?
-  color         String?
-  isActive      Boolean  @default(true) @map("is_active")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  provider    Provider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  vehicleType VehicleType @relation(fields: [vehicleTypeId], references: [id])
-
-  @@index([providerId])
-  @@map("provider_vehicles")
-}
-
 model ProviderWallet {
   id             String   @id @default(uuid())
   providerId     String   @unique @map("provider_id")
@@ -600,122 +527,14 @@ model ProviderWallet {
 }
 
 // ============================================================
-// COMPANIES
-// ============================================================
-
-model Company {
-  id           String    @id @default(uuid())
-  name         String
-  nameAr       String?   @map("name_ar")
-  logoUrl      String?   @map("logo_url")
-  contactEmail String    @map("contact_email")
-  contactPhone String    @map("contact_phone")
-  address      String?   @db.Text
-  taxNumber    String?   @map("tax_number")
-  industry     String?
-  status       String    @default("active")
-  createdBy    String?   @map("created_by")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
-
-  companyUsers    CompanyUser[]
-  billingProfiles CompanyBillingProfile[]
-  approvalRules   ApprovalRule[]
-  orders          Order[]
-  invoices        Invoice[]
-
-  @@index([status])
-  @@index([deletedAt])
-  @@map("companies")
-}
-
-model CompanyUser {
-  id        String   @id @default(uuid())
-  companyId String   @map("company_id")
-  userId    String   @map("user_id")
-  role      String   @default("employee")
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  company Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([companyId, userId])
-  @@index([userId])
-  @@map("company_users")
-}
-
-model CompanyBillingProfile {
-  id               String   @id @default(uuid())
-  companyId        String   @map("company_id")
-  billingName      String   @map("billing_name")
-  billingEmail     String   @map("billing_email")
-  billingAddress   String?  @map("billing_address") @db.Text
-  taxNumber        String?  @map("tax_number")
-  paymentTermsDays Int      @default(30) @map("payment_terms_days")
-  creditLimit      Decimal  @default(0) @map("credit_limit") @db.Decimal(12, 2)
-  currency         String   @default("SAR")
-  isDefault        Boolean  @default(false) @map("is_default")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@index([companyId])
-  @@map("company_billing_profiles")
-}
-
-model ApprovalRule {
-  id              String   @id @default(uuid())
-  companyId       String   @map("company_id")
-  name            String
-  serviceTypeCode String?  @map("service_type_code")
-  minAmount       Decimal? @map("min_amount") @db.Decimal(12, 2)
-  maxAmount       Decimal? @map("max_amount") @db.Decimal(12, 2)
-  approverRole    String   @map("approver_role")
-  level           Int      @default(1)
-  isActive        Boolean  @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@index([companyId, isActive])
-  @@map("approval_rules")
-}
-
-model ApprovalHistory {
-  id         String         @id @default(uuid())
-  orderId    String         @map("order_id")
-  approverId String         @map("approver_id")
-  ruleId     String?        @map("rule_id")
-  status     ApprovalStatus
-  notes      String?        @db.Text
-  level      Int            @default(1)
-  decidedAt  DateTime       @default(now()) @map("decided_at")
-  createdAt  DateTime       @default(now()) @map("created_at")
-
-  order Order @relation(fields: [orderId], references: [id])
-
-  @@index([orderId])
-  @@index([approverId])
-  @@map("approval_history")
-}
-
-// ============================================================
 // OPERATIONS
 // ============================================================
 
 model Order {
   id                String      @id @default(uuid())
   orderNumber       String      @unique @map("order_number")
-  sourceType        SourceType  @map("source_type")
   requesterId       String      @map("requester_id")
-  companyId         String?     @map("company_id")
-  serviceTypeId     String      @map("service_type_id")
-  vehicleTypeId     String?     @map("vehicle_type_id")
+  serviceId         String      @map("service_id")
   status            OrderStatus @default(draft)
   workerCount       Int         @default(1) @map("worker_count")
   isFragile         Boolean     @default(false) @map("is_fragile")
@@ -734,9 +553,7 @@ model Order {
   deletedAt         DateTime?   @map("deleted_at")
 
   requester   User         @relation("OrderRequester", fields: [requesterId], references: [id])
-  company     Company?     @relation(fields: [companyId], references: [id])
-  serviceType ServiceType  @relation(fields: [serviceTypeId], references: [id])
-  vehicleType VehicleType? @relation(fields: [vehicleTypeId], references: [id])
+  service     Service      @relation(fields: [serviceId], references: [id])
 
   locations       OrderLocation[]
   items           OrderItem[]
@@ -744,13 +561,11 @@ model Order {
   statusHistory   OrderStatusHistory[]
   offers          Offer[]
   assignments     Assignment[]
-  approvalHistory ApprovalHistory[]
   cancellation    Cancellation?
   invoice         Invoice?
   deliveryProofs  DeliveryProof[]
 
   @@index([status])
-  @@index([companyId, status])
   @@index([requesterId])
   @@index([createdAt])
   @@index([orderNumber])
@@ -935,7 +750,6 @@ model Invoice {
   id            String        @id @default(uuid())
   invoiceNumber String        @unique @map("invoice_number")
   orderId       String?       @unique @map("order_id")
-  companyId     String?       @map("company_id")
   providerId    String?       @map("provider_id")
   subtotal      Decimal       @default(0) @db.Decimal(12, 2)
   taxAmount     Decimal       @default(0) @map("tax_amount") @db.Decimal(12, 2)
@@ -951,11 +765,9 @@ model Invoice {
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
   order    Order?        @relation(fields: [orderId], references: [id])
-  company  Company?      @relation(fields: [companyId], references: [id])
   items    InvoiceItem[]
   payments Payment[]
 
-  @@index([companyId, status])
   @@index([status])
   @@map("invoices")
 }

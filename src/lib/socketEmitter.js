@@ -35,11 +35,6 @@ function emitProvider(io, providerId, event, payload) {
   emitToRoom(io, `provider:${providerId}`, event, payload);
 }
 
-function emitCompany(io, companyId, event, payload) {
-  if (!companyId) return;
-  emitToRoom(io, `company:${companyId}`, event, payload);
-}
-
 function emitUser(io, userId, event, payload) {
   emitToRoom(io, `user:${userId}`, event, payload);
 }
@@ -49,7 +44,6 @@ module.exports = {
   emitToRoom,
   emitOrder,
   emitProvider,
-  emitCompany,
   emitUser,
   EVENTS,
 };

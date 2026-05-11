@@ -1,4 +1,4 @@
-const { ROLES, ROLE_SCOPE, INTERNAL_ROLES, COMPANY_ROLES, PROVIDER_ROLES } = require('./roles');
+const { ROLES, ROLE_SCOPE, INTERNAL_ROLES, PROVIDER_ROLES } = require('./roles');
 const { PERMISSIONS } = require('./permissions');
 
 const HTTP_STATUS = {
@@ -34,9 +34,6 @@ const ERROR_CODES = {
 const ORDER_STATUS = {
   DRAFT: 'draft',
   SUBMITTED: 'submitted',
-  PENDING_APPROVAL: 'pending_approval',
-  APPROVED: 'approved',
-  REJECTED: 'rejected',
   PUBLISHED_FOR_OFFERS: 'published_for_offers',
   OFFER_RECEIVED: 'offer_received',
   OFFER_ACCEPTED: 'offer_accepted',
@@ -59,12 +56,6 @@ const OFFER_STATUS = {
   WITHDRAWN: 'withdrawn',
 };
 
-const APPROVAL_STATUS = {
-  PENDING: 'pending',
-  APPROVED: 'approved',
-  REJECTED: 'rejected',
-};
-
 const INVOICE_STATUS = {
   DRAFT: 'draft',
   ISSUED: 'issued',
@@ -85,14 +76,12 @@ module.exports = {
   ROLES,
   ROLE_SCOPE,
   INTERNAL_ROLES,
-  COMPANY_ROLES,
   PROVIDER_ROLES,
   PERMISSIONS,
   HTTP_STATUS,
   ERROR_CODES,
   ORDER_STATUS,
   OFFER_STATUS,
-  APPROVAL_STATUS,
   INVOICE_STATUS,
   TICKET_STATUS,
 };

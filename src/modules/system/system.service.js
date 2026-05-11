@@ -13,7 +13,6 @@ const notFound = (row) => {
 
 async function listInvoices(query, user, tenantScope) {
   const lq = parseListQuery(query, {});
-  if (tenantScope.type === 'company') lq.where.companyId = tenantScope.companyId;
   if (tenantScope.type === 'self') lq.where.order = { requesterId: user.id };
   return repo.paginate('invoice', lq, { include: { items: true, order: true } });
 }
@@ -156,15 +155,6 @@ async function listTickets(req) {
     (tenantScope.type === 'assignment' && !(req.user.roles || []).some((role) => ['super_admin', 'support_admin'].includes(role)))
   ) {
     where = { ...baseWhere, userId: req.user.id };
-  } else if (
-    tenantScope.type === 'company' &&
-    (req.user.permissions || []).includes(PERMISSIONS.TICKETS_READ_COMPANY) &&
-    !(req.user.permissions || []).includes(PERMISSIONS.TICKETS_READ)
-  ) {
-    const companyId = tenantScope.companyId;
-    const staffIds = (await repo.findMany('companyUser', { where: { companyId }, select: { userId: true } })).map((row) => row.userId);
-    const orderIds = (await repo.findMany('order', { where: { companyId }, select: { id: true } })).map((row) => row.id);
-    where = { AND: [baseWhere, { OR: [{ userId: { in: staffIds } }, { orderId: { in: orderIds } }] }] };
   }
   lq.where = where;
   return repo.paginate('ticket', lq);

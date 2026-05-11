@@ -1,9 +1,7 @@
 const { prisma } = require('../../lib/prisma');
 
 const models = {
-  serviceCategory: prisma.serviceCategory,
-  serviceType: prisma.serviceType,
-  vehicleType: prisma.vehicleType,
+  service: prisma.service,
   city: prisma.city,
   pricingSetting: prisma.pricingSetting,
   appSetting: prisma.appSetting,
@@ -39,14 +37,6 @@ class MasterDataRepository {
 
   delete(modelName, id) {
     return model(modelName).delete({ where: { id } });
-  }
-
-  countServiceTypesByCategory(serviceCategoryId) {
-    return prisma.serviceType.count({ where: { serviceCategoryId } });
-  }
-
-  findServiceCategory(id) {
-    return prisma.serviceCategory.findUnique({ where: { id } });
   }
 
 }

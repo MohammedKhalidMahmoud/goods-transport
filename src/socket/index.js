@@ -4,7 +4,7 @@ const { config } = require('../config');
 const { logger } = require('../lib/logger');
 const { ROLES, INTERNAL_ROLES } = require('../constants/roles');
 
-const ROOM_PREFIXES = ['order:', 'provider:', 'company:', 'user:', 'internal:'];
+const ROOM_PREFIXES = ['order:', 'provider:', 'user:', 'internal:'];
 
 function isAllowedRoom(room) {
   if (typeof room !== 'string' || !room.length) return false;
@@ -30,7 +30,6 @@ function initializeSocket(httpServer) {
       socket.data.authenticated = true;
       socket.data.userId = payload.userId;
       socket.data.roles = payload.roles || [];
-      socket.data.companyId = payload.companyId || null;
       socket.data.providerId = payload.providerId || null;
       return next();
     } catch (e) {
@@ -44,9 +43,6 @@ function initializeSocket(httpServer) {
 
     if (socket.data.authenticated && socket.data.userId) {
       socket.join(`user:${socket.data.userId}`);
-    }
-    if (socket.data.authenticated && socket.data.companyId) {
-      socket.join(`company:${socket.data.companyId}`);
     }
     if (socket.data.authenticated && socket.data.providerId) {
       socket.join(`provider:${socket.data.providerId}`);
@@ -66,9 +62,6 @@ function initializeSocket(httpServer) {
         return;
       }
       if (room.startsWith('user:') && room !== `user:${socket.data.userId}`) {
-        return;
-      }
-      if (room.startsWith('company:') && room !== `company:${socket.data.companyId}`) {
         return;
       }
       if (room.startsWith('provider:') && room !== `provider:${socket.data.providerId}`) {

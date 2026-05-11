@@ -113,7 +113,7 @@ function requireAppRole(...allowedRoles) {
 
 /**
  * Middleware to resolve and enforce tenant scoping.
- * Ensures company/provider-scoped users can only access their own tenant data.
+ * Ensures provider-scoped users can only access their own tenant data.
  *
  * Attaches req.tenantScope with { type, id } for use in repositories.
  */
@@ -133,7 +133,7 @@ function resolveTenantScope(req, _res, next) {
 
 /**
  * Verify that the requested resource belongs to the user's tenant.
- * Used when a route parameter specifies a companyId or providerId.
+ * Used when a route parameter specifies a providerId.
  */
 function enforceTenantParam(paramName) {
   return (req, _res, next) => {

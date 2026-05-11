@@ -13,10 +13,6 @@ const permissions = [
   ['users:delete', 'Delete Users', 'users', 'delete'],
   ['master_data:read', 'Read Master Data', 'master_data', 'read'],
   ['master_data:manage', 'Manage Master Data', 'master_data', 'manage'],
-  ['companies:read', 'Read Companies', 'companies', 'read'],
-  ['companies:create', 'Create Companies', 'companies', 'create'],
-  ['companies:update', 'Update Companies', 'companies', 'update'],
-  ['companies:delete', 'Delete Companies', 'companies', 'delete'],
   ['providers:read', 'Read Providers', 'providers', 'read'],
   ['providers:create', 'Create Providers', 'providers', 'create'],
   ['providers:update', 'Update Providers', 'providers', 'update'],
@@ -161,22 +157,10 @@ async function main() {
     create: { userId: providerUser.id, businessName: 'Provider Demo', logoUrl: null },
   });
 
-  const category = await prisma.serviceCategory.upsert({
-    where: { code: 'moving' },
-    update: { name: 'Moving', nameAr: 'نقل', isActive: true },
-    create: { code: 'moving', name: 'Moving', nameAr: 'نقل', isActive: true },
-  });
-
-  const serviceType = await prisma.serviceType.upsert({
+  const service = await prisma.service.upsert({
     where: { code: 'home_moving' },
-    update: { serviceCategoryId: category.id, name: 'Home Moving', isActive: true },
-    create: { serviceCategoryId: category.id, code: 'home_moving', name: 'Home Moving', isActive: true },
-  });
-
-  const vehicleType = await prisma.vehicleType.upsert({
-    where: { code: 'van' },
-    update: { name: 'Van', capacity: 'Small loads', isActive: true },
-    create: { code: 'van', name: 'Van', capacity: 'Small loads', isActive: true },
+    update: { name: 'Home Moving', isActive: true },
+    create: { code: 'home_moving', name: 'Home Moving', isActive: true },
   });
 
   await prisma.city.upsert({
@@ -186,37 +170,40 @@ async function main() {
   });
 
   await prisma.pricingSetting.upsert({
-    where: { serviceTypeCode: serviceType.code },
+    where: { serviceCode: service.code },
     update: { baseFare: 100, perKmRate: 5, perWorkerRate: 40, currency: 'SAR', isActive: true },
-    create: { serviceTypeCode: serviceType.code, baseFare: 100, perKmRate: 5, perWorkerRate: 40, currency: 'SAR', isActive: true },
+    create: { serviceCode: service.code, baseFare: 100, perKmRate: 5, perWorkerRate: 40, currency: 'SAR', isActive: true },
   });
 
-  await prisma.appSetting.upsert({
-    where: { key: 'support_email' },
-    update: { value: 'support@test.com', group: 'support' },
-    create: { key: 'support_email', value: 'support@test.com', group: 'support' },
-  });
+  const appSettings = [
+    ['app_name', 'Goods Transport', 'app'],
+    ['default_language', 'en', 'app'],
+    ['currency', 'SAR', 'app'],
+    ['help_title', 'Help & Support', 'help_support'],
+    ['help_description', 'Contact support if you need help with an order or account issue.', 'help_support'],
+    ['support_email', 'support@test.com', 'help_support'],
+    ['support_phone', '+966500000000', 'help_support'],
+    ['support_whatsapp', '+966500000000', 'help_support'],
+    ['privacy_title', 'Privacy Policy', 'privacy_policy'],
+    ['privacy_content', 'We collect only the information required to provide goods transport services and support your orders.', 'privacy_policy'],
+    ['privacy_version', '1.0', 'privacy_policy'],
+  ];
 
-  const company = await prisma.company.upsert({
-    where: { id: '00000000-0000-4000-8000-000000000101' },
-    update: { name: 'Demo Company', contactEmail: 'company@test.com', contactPhone: '+966500000030', status: 'active' },
-    create: {
-      id: '00000000-0000-4000-8000-000000000101',
-      name: 'Demo Company',
-      contactEmail: 'company@test.com',
-      contactPhone: '+966500000030',
-      status: 'active',
-      createdBy: admin.id,
-    },
-  });
+  for (const [key, value, group] of appSettings) {
+    await prisma.appSetting.upsert({
+      where: { key },
+      update: { value, group },
+      create: { key, value, group },
+    });
+  }
 
   const provider = await prisma.provider.upsert({
     where: { id: '00000000-0000-4000-8000-000000000201' },
-    update: { name: 'Demo Provider', contactEmail: 'provider-company@test.com', contactPhone: '+966500000040', status: 'active' },
+    update: { name: 'Demo Provider', contactEmail: 'provider-org@test.com', contactPhone: '+966500000040', status: 'active' },
     create: {
       id: '00000000-0000-4000-8000-000000000201',
       name: 'Demo Provider',
-      contactEmail: 'provider-company@test.com',
+      contactEmail: 'provider-org@test.com',
       contactPhone: '+966500000040',
       status: 'active',
       createdBy: admin.id,
@@ -229,12 +216,6 @@ async function main() {
     create: { providerId: provider.id },
   });
 
-  await prisma.providerVehicle.upsert({
-    where: { id: '00000000-0000-4000-8000-000000000301' },
-    update: { providerId: provider.id, vehicleTypeId: vehicleType.id, plateNumber: 'ABC-123' },
-    create: { id: '00000000-0000-4000-8000-000000000301', providerId: provider.id, vehicleTypeId: vehicleType.id, plateNumber: 'ABC-123' },
-  });
-
   const driver = await prisma.providerDriver.upsert({
     where: { id: '00000000-0000-4000-8000-000000000302' },
     update: { providerId: provider.id, name: 'Demo Driver', phone: '+966500000050' },
@@ -243,13 +224,11 @@ async function main() {
 
   const order = await prisma.order.upsert({
     where: { orderNumber: 'GT-DEMO-001' },
-    update: { status: 'published_for_offers', requesterId: customer.id, serviceTypeId: serviceType.id, vehicleTypeId: vehicleType.id },
+    update: { status: 'published_for_offers', requesterId: customer.id, serviceId: service.id },
     create: {
       orderNumber: 'GT-DEMO-001',
-      sourceType: 'individual',
       requesterId: customer.id,
-      serviceTypeId: serviceType.id,
-      vehicleTypeId: vehicleType.id,
+      serviceId: service.id,
       status: 'published_for_offers',
       workerCount: 1,
       estimatedPrice: 250,
@@ -295,3 +274,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

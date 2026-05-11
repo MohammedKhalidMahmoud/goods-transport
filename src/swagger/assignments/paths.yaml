@@ -12,38 +12,6 @@
     parameters:
       - $ref: '#/components/parameters/PageQuery'
       - $ref: '#/components/parameters/LimitQuery'
-  post:
-    tags:
-      - Assignments
-    summary: Create assignment
-    security:
-      - bearerAuth: []
-    responses:
-      '201':
-        description: Created
-        $ref: '#/components/responses/Created'
-      '400':
-        $ref: '#/components/responses/BadRequest'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - orderId
-              - providerId
-            properties:
-              orderId:
-                type: string
-                format: uuid
-              providerId:
-                type: string
-                format: uuid
-              driverId:
-                type: string
-                format: uuid
-                nullable: true
 /assignments/{id}:
   get:
     tags:
@@ -92,18 +60,6 @@
               notes:
                 type: string
                 nullable: true
-  delete:
-    tags:
-      - Assignments
-    summary: Cancel assignment
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-        $ref: '#/components/responses/Success'
 /dashboard/assignments:
   get:
     tags:

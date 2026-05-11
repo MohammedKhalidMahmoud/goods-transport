@@ -36,12 +36,6 @@ class ProvidersController {
   updateProviderWorker = this.success((req) => providersService.updateSubResource('providerWorker', req.params.id, req.body, req.tenantScope));
   deleteProviderWorker = this.empty((req) => providersService.deleteSubResource('providerWorker', req.params.id, req.tenantScope), 'Deleted');
 
-  listProviderVehicles = this.paginated((req) => providersService.listSubResource('providerVehicle', 'providerId', req.query, req.tenantScope));
-  createProviderVehicle = this.created((req) => providersService.createSubResource('providerVehicle', req.body, req.tenantScope));
-  getProviderVehicle = this.success((req) => providersService.getSubResource('providerVehicle', req.params.id, req.tenantScope));
-  updateProviderVehicle = this.success((req) => providersService.updateSubResource('providerVehicle', req.params.id, req.body, req.tenantScope));
-  deleteProviderVehicle = this.empty((req) => providersService.deleteSubResource('providerVehicle', req.params.id, req.tenantScope), 'Deleted');
-
   getWallet = this.success((req) => providersService.getWallet(req.tenantScope));
   getEarnings = this.success((req) => providersService.getEarnings(req.tenantScope));
   listSettlements = this.paginated((req) => providersService.listSettlements(req.query, req.tenantScope));

@@ -42,20 +42,11 @@
           schema:
             type: object
             required:
-              - serviceTypeId
+              - serviceId
             properties:
-              sourceType:
-                type: string
-                enum:
-                  - individual
-                  - company
-              serviceTypeId:
+              serviceId:
                 type: string
                 format: uuid
-              vehicleTypeId:
-                type: string
-                format: uuid
-                nullable: true
               workerCount:
                 type: integer
                 minimum: 1
@@ -154,83 +145,6 @@
         $ref: '#/components/responses/Forbidden'
       '404':
         $ref: '#/components/responses/NotFound'
-  patch:
-    tags:
-      - Orders
-    summary: Update order
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-        $ref: '#/components/responses/Success'
-      '400':
-        $ref: '#/components/responses/BadRequest'
-      '403':
-        $ref: '#/components/responses/Forbidden'
-      '404':
-        $ref: '#/components/responses/NotFound'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              sourceType:
-                type: string
-                enum:
-                  - individual
-                  - company
-              serviceTypeId:
-                type: string
-                format: uuid
-              vehicleTypeId:
-                type: string
-                format: uuid
-                nullable: true
-              workerCount:
-                type: integer
-                minimum: 1
-              isFragile:
-                type: boolean
-              notes:
-                type: string
-                nullable: true
-              scheduledDate:
-                type: string
-                format: date-time
-              scheduledTimeSlot:
-                type: string
-                nullable: true
-              estimatedPrice:
-                type: number
-              locations:
-                type: array
-                items:
-                  type: object
-              items:
-                type: array
-                items:
-                  type: object
-  delete:
-    tags:
-      - Orders
-    summary: Soft-delete order
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-        $ref: '#/components/responses/Success'
-      '403':
-        $ref: '#/components/responses/Forbidden'
-      '404':
-        $ref: '#/components/responses/NotFound'
 /orders/{id}/timeline:
   get:
     tags:
@@ -298,7 +212,7 @@
   post:
     tags:
       - Orders
-    summary: Submit order for approval or publishing
+    summary: Submit order for publishing
     security:
       - bearerAuth: []
     parameters:
@@ -309,19 +223,6 @@
         $ref: '#/components/responses/Success'
       '403':
         $ref: '#/components/responses/Forbidden'
-/orders/{id}/publish:
-  post:
-    tags:
-      - Orders
-    summary: Publish order for offers
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/IdPath'
-    responses:
-      '200':
-        description: OK
-        $ref: '#/components/responses/Success'
 /orders/{id}/cancel:
   post:
     tags:
@@ -348,11 +249,11 @@
             properties:
               reason:
                 type: string
-/orders/{id}/assign:
+/orders/{id}/accept:
   post:
     tags:
       - Orders
-    summary: Assign provider and optional driver
+    summary: Provider accepts assigned order
     security:
       - bearerAuth: []
     parameters:
@@ -360,25 +261,53 @@
     responses:
       '200':
         description: OK
-      '201':
-        $ref: '#/components/responses/Created'
+        $ref: '#/components/responses/Success'
       '400':
         $ref: '#/components/responses/BadRequest'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+      '404':
+        $ref: '#/components/responses/NotFound'
     requestBody:
-      required: true
+      required: false
       content:
         application/json:
           schema:
             type: object
-            required:
-              - providerId
             properties:
-              providerId:
-                type: string
-                format: uuid
               driverId:
                 type: string
                 format: uuid
+                nullable: true
+              notes:
+                type: string
+                nullable: true
+/orders/{id}/reject:
+  post:
+    tags:
+      - Orders
+    summary: Provider rejects assigned order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+      '404':
+        $ref: '#/components/responses/NotFound'
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              reason:
+                type: string
                 nullable: true
 /orders/{id}/start:
   post:
@@ -458,32 +387,255 @@
       '200':
         description: OK
         $ref: '#/components/responses/Success'
-/order-items:
+/dashboard/orders:
   get:
     tags:
-      - Orders
-    summary: List order items for an order
+      - Admin Orders
+    summary: List orders scoped by RBAC and tenant context
     security:
       - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/PageQuery'
+      - $ref: '#/components/parameters/LimitQuery'
+      - $ref: '#/components/parameters/StatusQuery'
+      - $ref: '#/components/parameters/DateFromQuery'
+      - $ref: '#/components/parameters/DateToQuery'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Paginated'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+  post:
+    tags:
+      - Admin Orders
+    summary: Create order
+    security:
+      - bearerAuth: []
+    responses:
+      '201':
+        description: Created
+        $ref: '#/components/responses/Created'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - serviceId
+            properties:
+              serviceId:
+                type: string
+                format: uuid
+              workerCount:
+                type: integer
+                minimum: 1
+              isFragile:
+                type: boolean
+              notes:
+                type: string
+                nullable: true
+              scheduledDate:
+                type: string
+                format: date-time
+              scheduledTimeSlot:
+                type: string
+                nullable: true
+              estimatedPrice:
+                type: number
+              locations:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - type
+                    - addressLine
+                    - city
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - pickup
+                        - dropoff
+                    addressLine:
+                      type: string
+                    city:
+                      type: string
+                    area:
+                      type: string
+                      nullable: true
+                    latitude:
+                      type: number
+                    longitude:
+                      type: number
+                    floor:
+                      type: integer
+                    unit:
+                      type: string
+                      nullable: true
+                    hasElevator:
+                      type: boolean
+                    contactName:
+                      type: string
+                      nullable: true
+                    contactPhone:
+                      type: string
+                      nullable: true
+                    notes:
+                      type: string
+                      nullable: true
+              items:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - name
+                  properties:
+                    name:
+                      type: string
+                    quantity:
+                      type: integer
+                      minimum: 1
+                    description:
+                      type: string
+                      nullable: true
+                    isFragile:
+                      type: boolean
+                    weight:
+                      type: number
+                    dimensions:
+                      type: string
+                      nullable: true
+/dashboard/orders/{id}:
+  get:
+    tags:
+      - Admin Orders
+    summary: Get order by id
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
     responses:
       '200':
         description: OK
         $ref: '#/components/responses/Success'
-      '400':
-        $ref: '#/components/responses/BadRequest'
-    parameters:
-      - in: query
-        name: orderId
-        required: true
-        schema:
-          type: string
-          format: uuid
-  post:
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
+      '404':
+        $ref: '#/components/responses/NotFound'
+  patch:
     tags:
-      - Orders
-    summary: Create order item
+      - Admin Orders
+    summary: Update order
     security:
       - bearerAuth: []
+    parameters:
+      - '': '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        '': '#/components/responses/Success'
+      '400':
+        '': '#/components/responses/BadRequest'
+      '403':
+        '': '#/components/responses/Forbidden'
+      '404':
+        '': '#/components/responses/NotFound'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              serviceId:
+                type: string
+                format: uuid
+              workerCount:
+                type: integer
+                minimum: 1
+              isFragile:
+                type: boolean
+              notes:
+                type: string
+                nullable: true
+              scheduledDate:
+                type: string
+                format: date-time
+              scheduledTimeSlot:
+                type: string
+                nullable: true
+              estimatedPrice:
+                type: number
+              locations:
+                type: array
+                items:
+                  type: object
+              items:
+                type: array
+                items:
+                  type: object
+  delete:
+    tags:
+      - Admin Orders
+    summary: Soft-delete order
+    security:
+      - bearerAuth: []
+    parameters:
+      - '': '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        '': '#/components/responses/Success'
+      '403':
+        '': '#/components/responses/Forbidden'
+      '404':
+        '': '#/components/responses/NotFound'
+/dashboard/orders/{id}/timeline:
+  get:
+    tags:
+      - Admin Orders
+    summary: Order status history
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/orders/{id}/attachments:
+  get:
+    tags:
+      - Admin Orders
+    summary: List order attachment metadata
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+  post:
+    tags:
+      - Admin Orders
+    summary: Register order attachment metadata
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
     responses:
       '201':
         description: Created
@@ -497,32 +649,27 @@
           schema:
             type: object
             required:
-              - orderId
-              - name
+              - fileName
+              - originalName
+              - filePath
+              - mimeType
+              - fileSize
             properties:
-              orderId:
+              fileName:
                 type: string
-                format: uuid
-              name:
+              originalName:
                 type: string
-              quantity:
+              filePath:
+                type: string
+              mimeType:
+                type: string
+              fileSize:
                 type: integer
-                minimum: 1
-              description:
-                type: string
-                nullable: true
-              isFragile:
-                type: boolean
-              weight:
-                type: number
-              dimensions:
-                type: string
-                nullable: true
-/order-items/{id}:
-  get:
+/dashboard/orders/{id}/submit:
+  post:
     tags:
-      - Orders
-    summary: Get order item
+      - Admin Orders
+    summary: Submit order for publishing
     security:
       - bearerAuth: []
     parameters:
@@ -531,12 +678,13 @@
       '200':
         description: OK
         $ref: '#/components/responses/Success'
-      '404':
-        $ref: '#/components/responses/NotFound'
-  patch:
+      '403':
+        $ref: '#/components/responses/Forbidden'
+/dashboard/orders/{id}/cancel:
+  post:
     tags:
-      - Orders
-    summary: Update order item
+      - Admin Orders
+    summary: Cancel order
     security:
       - bearerAuth: []
     parameters:
@@ -553,25 +701,16 @@
         application/json:
           schema:
             type: object
+            required:
+              - reason
             properties:
-              name:
+              reason:
                 type: string
-              quantity:
-                type: integer
-              description:
-                type: string
-                nullable: true
-              isFragile:
-                type: boolean
-              weight:
-                type: number
-              dimensions:
-                type: string
-                nullable: true
-  delete:
+/dashboard/orders/{id}/start:
+  post:
     tags:
-      - Orders
-    summary: Delete order item
+      - Admin Orders
+    summary: Mark order en route to pickup
     security:
       - bearerAuth: []
     parameters:
@@ -580,3 +719,117 @@
       '200':
         description: OK
         $ref: '#/components/responses/Success'
+/dashboard/orders/{id}/arrive-pickup:
+  post:
+    tags:
+      - Admin Orders
+    summary: Mark order arrived at pickup
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/orders/{id}/pickup:
+  post:
+    tags:
+      - Admin Orders
+    summary: Mark order picked up
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/orders/{id}/arrive-dropoff:
+  post:
+    tags:
+      - Admin Orders
+    summary: Mark order arrived at dropoff
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/orders/{id}/deliver:
+  post:
+    tags:
+      - Admin Orders
+    summary: Mark order delivered
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/orders/{id}/complete:
+  post:
+    tags:
+      - Admin Orders
+    summary: Complete order
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        $ref: '#/components/responses/Success'
+/dashboard/orders/{id}/publish:
+  post:
+    tags:
+      - Admin Orders
+    summary: Publish order for offers
+    security:
+      - bearerAuth: []
+    parameters:
+      - '': '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+        '': '#/components/responses/Success'
+      '403':
+        '': '#/components/responses/Forbidden'
+      '422':
+        '': '#/components/responses/Unprocessable'
+/dashboard/orders/{id}/assign:
+  post:
+    tags:
+      - Admin Orders
+    summary: Assign provider and optional driver
+    security:
+      - bearerAuth: []
+    parameters:
+      - '': '#/components/parameters/IdPath'
+    responses:
+      '200':
+        description: OK
+      '201':
+        '': '#/components/responses/Created'
+      '400':
+        '': '#/components/responses/BadRequest'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - providerId
+            properties:
+              providerId:
+                type: string
+                format: uuid
+              driverId:
+                type: string
+                format: uuid
+                nullable: true

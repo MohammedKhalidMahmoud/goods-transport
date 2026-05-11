@@ -10,7 +10,7 @@ const { ROLES } = require('../../constants/roles');
 const router = Router();
 const tenant = [authenticateDashboard, resolveTenantScope];
 
-router.get('/tickets', ...tenant, authorizePermissions(PERMISSIONS.TICKETS_READ, PERMISSIONS.TICKETS_READ_OWN, PERMISSIONS.TICKETS_READ_COMPANY), ticketsController.listTickets);
+router.get('/tickets', ...tenant, authorizePermissions(PERMISSIONS.TICKETS_READ, PERMISSIONS.TICKETS_READ_OWN), ticketsController.listTickets);
 router.post('/tickets', authenticateDashboard, validate({ body: Joi.object({ subject: Joi.string().required(), description: Joi.string().required(), issueTypeId: Joi.string().uuid().allow(null), orderId: Joi.string().uuid().allow(null), priority: Joi.string() }) }), ticketsController.createTicket);
 router.get('/tickets/:id', authenticateDashboard, resolveTenantScope, ticketsController.getTicket);
 router.patch('/tickets/:id', authenticateDashboard, resolveTenantScope, authorizePermissions(PERMISSIONS.TICKETS_UPDATE), validate({ body: Joi.object({ subject: Joi.string(), description: Joi.string(), priority: Joi.string(), status: Joi.string() }).min(1) }), ticketsController.updateTicket);

@@ -18,9 +18,7 @@ const delegates = {
   issueType: prisma.issueType,
   notification: prisma.notification,
   order: prisma.order,
-  companyUser: prisma.companyUser,
   provider: prisma.provider,
-  company: prisma.company,
   offer: prisma.offer,
   assignment: prisma.assignment,
   providerWallet: prisma.providerWallet,
@@ -91,7 +89,6 @@ class SystemRepository {
         data: {
           invoiceNumber: `INV-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
           orderId: body.orderId || null,
-          companyId: body.companyId || null,
           providerId: body.providerId || null,
           subtotal: body.subtotal ?? 0,
           taxAmount: body.taxAmount ?? 0,
