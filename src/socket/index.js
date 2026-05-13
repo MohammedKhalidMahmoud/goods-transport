@@ -14,7 +14,7 @@ function isAllowedRoom(room) {
 function initializeSocket(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: config.cors.origin,
+      origin: config.cors.origins,
       methods: ['GET', 'POST'],
     },
   });

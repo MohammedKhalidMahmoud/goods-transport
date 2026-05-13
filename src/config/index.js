@@ -3,6 +3,31 @@ const path = require('path');
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+function parseCorsOrigins(value) {
+  const fallbackOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://goods-transfer.nodeteam.site',
+  ];
+
+  const rawOrigins = (value || fallbackOrigins.join(','))
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  if (rawOrigins.includes('*')) {
+    return '*';
+  }
+
+  return [...new Set(rawOrigins.map((origin) => {
+    try {
+      return new URL(origin).origin;
+    } catch {
+      return origin;
+    }
+  }))];
+}
+
 const config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 3000,
@@ -21,7 +46,7 @@ const config = {
   },
 
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origins: parseCorsOrigins(process.env.CORS_ORIGIN),
   },
 
   logging: {
