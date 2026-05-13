@@ -11,6 +11,19 @@ const { logger } = require('../lib/logger');
 const globSync = glob.globSync || glob.sync || glob;
 const swaggerRoot = path.resolve(__dirname, '../swagger');
 const httpMethods = new Set(['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace']);
+const deployedApiUrl = 'https://goods-transfer.nodeteam.site/api/v1';
+const configuredApiUrl = `${config.appUrl}/api/v1`;
+
+const servers = [
+  {
+    url: configuredApiUrl,
+    description: config.env === 'production' ? 'Production' : 'Development',
+  },
+  {
+    url: deployedApiUrl,
+    description: 'Production',
+  },
+].filter((server, index, allServers) => allServers.findIndex((item) => item.url === server.url) === index);
 
 const baseDocument = {
   openapi: '3.0.0',
@@ -19,12 +32,7 @@ const baseDocument = {
     version: '1.0.0',
     description: 'Enterprise Logistics Platform REST API Documentation',
   },
-  servers: [
-    {
-      url: `${config.appUrl}/api/v1`,
-      description: config.env === 'production' ? 'Production' : 'Development',
-    },
-  ],
+  servers,
   paths: {},
   components: {
     securitySchemes: {
